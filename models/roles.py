@@ -1,5 +1,20 @@
 from abc import ABC, abstractmethod
 
+from typing import List, Optional
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class Role(Base):
+    __tablename__ = "role"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(20))
+
 
 class Commercial(ABC):
     """Class for commercial"""

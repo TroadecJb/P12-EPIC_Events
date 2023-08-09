@@ -1,26 +1,38 @@
 import bcrypt
+from sqlalchemy import select
+from sqlalchemy.orm import sessionmaker
+from models.tables import User
+from views.basic_view import show_error, show
 
 
-def signup():
-    email = input("Enter email address: ")
-    pwd = input("Enter password: ").encode()
-    conf_pwd = input("Confirm password: ").encode()
+class Authentication_controller:
+    def __init__(self, engine):
+        self.session = sessionmaker(engine)
+        self.user_instance = None
 
-    # check if bcrypt directly on the input is more secure
-    if conf_pwd == pwd:
-        secure_pwd = bcrypt.hashpw(pwd, bcrypt.gensalt())
-    else:
-        print("Passwords don't match!")
+    def login(self, email, pwd):
+        with self.session.begin() as session:
+            stmt = select(User).where(User.email == email)
+            result = session.execute(stmt).first()
 
-    # directly record in db or send to another function to do so
-    return email, secure_pwd
+            if result is not None and bcrypt.checkpw(pwd, result.User.password):
+                show("Connection success!")
+                self.user_instance = User(
+                    id=result.User.id,
+                    name=result.User.name,
+                    phone=result.User.phone,
+                    email=result.User.email,
+                    role_id=result.User.role_id,
+                )
+                return True
 
+            elif result is not None and not bcrypt.checkpw(pwd, result.User.password):
+                show_error("invalid password.")
+                return False
 
-def login():
-    email = input("Enter email address: ")
-    pwd = input("Enter password: ")
+            else:
+                show_error("invalid email.")
+                return False
 
-    secure_pwd = bcrypt.hashpw(pwd, bcrypt.gensalt())
-
-    # directly check in db or send to another function
-    return email, secure_pwd
+    def logout(self):
+        self.user_instance = None

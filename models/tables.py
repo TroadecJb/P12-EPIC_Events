@@ -59,13 +59,15 @@ class Client(Base):
     name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(100))
     phone: Mapped[str] = mapped_column(String(100))
-    contact_first: Mapped[datetime.datetime] = mapped_column(DateTime)
-    contact_last: Mapped[datetime.datetime] = mapped_column(DateTime)
+    contact_first: Mapped[str] = mapped_column(String)
+    contact_last: Mapped[str] = mapped_column(String)
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
     commercial_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     def __repr__(self) -> str:
-        return f"id={self.id}, name={self.name}, email={self.email}, phone={self.phone}"
+        return (
+            f"id={self.id}, name={self.name}, email={self.email}, phone={self.phone}."
+        )
 
 
 class Event(Base):
@@ -100,7 +102,7 @@ class Contract(Base):
     commercial_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     def __repr__(self) -> str:
-        return f"id={self.id}, client_id={self.client_id}, commercial_id={self.commercial_id}, valid={self.valid}, cost={self.cost_total}, remaining={self.cost_remaining}"
+        return f"id={self.id}, client_id={self.client_id}, commercial_id={self.commercial_id}, valid={self.valid}, cost={self.cost_total}, remaining={self.cost_remaining}."
 
 
 class Company(Base):
@@ -113,4 +115,4 @@ class Company(Base):
     address_id: Mapped[int] = mapped_column(ForeignKey("addresses.id"))
 
     def __repr__(self) -> str:
-        return f"id={self.id}, name={self.name}, address_id={self.address_id}"
+        return f"id={self.id}, name={self.name}, address_id={self.address_id}."

@@ -25,12 +25,50 @@ def database_initialization(engine, db):
             show(f"Creating database: {db}")
 
             admin = Role(name="admin")
-            commercial = Role(name="commercial")
+            sale = Role(name="sale")
             manager = Role(name="manager")
             support = Role(name="support")
 
             pwd = bcrypt.hashpw(b"truc", bcrypt.gensalt())
-            print(pwd)
+
+            test_client = Client(
+                name="test_client",
+                email="mail",
+                phone="06",
+                contact_first="hier",
+                contact_last="aujourd'hui",
+                company_id=1,
+                commercial_id=2,
+            )
+            test_client_2 = Client(
+                name="test_client_2",
+                email="mail",
+                phone="07",
+                contact_first="hier",
+                contact_last="aujourd'hui",
+                company_id=1,
+                commercial_id=2,
+            )
+
+            test_company = Company(
+                name="test_company",
+                address_id=1,
+            )
+
+            test_address = Address(
+                number="1",
+                street="rue",
+                city="ville",
+                code=22,
+            )
+
+            test_commerical = User(
+                name="commercil",
+                phone="",
+                email="commercial@mail.test",
+                password=pwd,
+                role_id=2,
+            )
 
             baseAdmin = User(
                 name="admin",
@@ -40,7 +78,20 @@ def database_initialization(engine, db):
                 role_id=1,
             )
 
-            session.add_all([admin, commercial, manager, support, baseAdmin])
+            session.add_all(
+                [
+                    admin,
+                    sale,
+                    manager,
+                    support,
+                    baseAdmin,
+                    test_client,
+                    test_client_2,
+                    test_company,
+                    test_address,
+                    test_commerical,
+                ]
+            )
             session.commit()
 
             show(f"Database created and initialized.")

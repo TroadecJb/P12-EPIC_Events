@@ -1,4 +1,3 @@
-import sqlite3
 from sqlalchemy import select, text, create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
@@ -19,19 +18,6 @@ class DatabaseManager:
     def check_database(self):
         if database_initialization(self.engine, self.db_name):
             self.db_exist = True
-
-    # def connection_begin(self):
-    #     if self.db_exist == True:
-    #         self.session.begin()
-    #         show(f"Connected to database: {self.db_name}")
-    #     else:
-    #         self.check_database()
-    #         self.connection_trial += 1
-    #         if self.connection_trial <= 4:
-    #             self.connection_begin()
-    #         else:
-    #             show_error("Issue with database, do some voodoo!")
-    #             quit()
 
     def connection_close(self):
         if self.session is not None:

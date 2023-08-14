@@ -9,9 +9,10 @@ from views.basic_view import show_error, show
 
 
 def database_initialization(engine, db):
-    # engine = create_engine(db, echo=False)
-    # # conn = engine.connect()
-    # # metadata = sqlalchemy.MetaData()
+    """
+    Check if database exists by querying the rows of the roles tables.
+    If the query is empty, the tables are created. Initializing the database.
+    """
     session = sessionmaker(engine)
 
     Base.metadata.create_all(engine)
@@ -67,7 +68,7 @@ def database_initialization(engine, db):
                 phone="",
                 email="commercial@mail.test",
                 password=pwd,
-                role_id=2,
+                role_id=3,
             )
 
             baseAdmin = User(
@@ -81,8 +82,8 @@ def database_initialization(engine, db):
             session.add_all(
                 [
                     admin,
-                    sale,
                     manager,
+                    sale,
                     support,
                     baseAdmin,
                     test_client,

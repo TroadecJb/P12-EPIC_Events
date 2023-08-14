@@ -16,8 +16,11 @@ class DatabaseManager:
         self.connection_trial = 0
 
     def check_database(self):
+        """Check if the database exists or initializes it."""
         if database_initialization(self.engine, self.db_name):
             self.db_exist = True
+        else:
+            return False
 
     def connection_close(self):
         if self.session is not None:

@@ -210,4 +210,5 @@ pyrightconfig.json
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,linux
 
 
-epic_events.db
+epic_events.sqlite
+epic_events_test.sqlite

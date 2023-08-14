@@ -1,8 +1,8 @@
 class Permission:
     user_permissions = {
         1: "admin",
-        2: "sale",
-        3: "manager",
+        2: "manager",
+        3: "sale",
         4: "support",
     }
 
@@ -12,3 +12,11 @@ class Permission:
             return True
         else:
             return False
+
+    def check_is_assigned_commercial(user, obj):
+        """Check if obj.commercial_id is the same as the user.id"""
+        pass
+
+    def check_is_assigned_support(user, event):
+        """Check if event.support_id is the same as the user.id"""
+        pass

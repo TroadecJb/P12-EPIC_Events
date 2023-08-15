@@ -5,7 +5,9 @@ import bcrypt
 
 
 from models.tables import Base, User, Role, Address, Client, Event, Company, Contract
-from views.basic_view import show_error, show
+from views.display import View
+
+view = View()
 
 
 def database_initialization(engine, db):
@@ -18,12 +20,13 @@ def database_initialization(engine, db):
     Base.metadata.create_all(engine)
 
     with session.begin() as session:
-        show(f"Checking if {db} exists or not...")
+        message = f"Checking if {db} exists or not..."
+        view.basic(message)
         check_empty = session.query(Role).first()
 
         if check_empty is None:
-            show(f"Database does not exist.")
-            show(f"Creating database: {db}")
+            view.basic(f"Database does not exist.")
+            view.basic(f"Creating database: {db}")
 
             admin = Role(name="admin")
             sale = Role(name="sale")
@@ -95,15 +98,15 @@ def database_initialization(engine, db):
             )
             session.commit()
 
-            show(f"Database created and initialized.")
+            view.basic(f"Database created and initialized.")
             session.close()
             return True
 
         elif check_empty is not None:
-            show(f"Database exists. Succesfully connected to {db}.")
+            view.basic(f"Database exists. Succesfully connected to {db}.")
             session.close()
             return True
         else:
-            show_error("Do some voodoo")
+            view.error_message("Do some voodoo")
             session.close()
             return False

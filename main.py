@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker
 from models.tables import Role, User
 from controllers.db_manager import DatabaseManager
 from controllers.authentication import Authentication_controller
-from controllers.actions import db_actions
-from controllers.menu import Menu
+from controllers.actions_tables import ActionsManager
+from views.display import View
 
 
 def main():
@@ -14,16 +14,15 @@ def main():
     db_manager = DatabaseManager(engine, db_uri)
     db_manager.check_database()
     auth_controller = Authentication_controller(engine)
-    user_session = None
 
-    if user_session is None:
-        if auth_controller.login():
-            user_session = auth_controller.user_instance
-        else:
-            quit()
+    auth_controller.login()
+    user_instance = auth_controller.user_instance
+    session = sessionmaker(engine)
 
-    menu = Menu(user_session)
-    menu.table_choice()
+    # with session.begin() as sessionquimarche:
+    menu = ActionsManager(session=session, user=user_instance)
+    menu.start()
+
     # session = sessionmaker(engine)
     # with session.begin() as sessionX:
     #     action = db_actions(sessionX, db_uri, user_session)

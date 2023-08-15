@@ -3,8 +3,10 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 from models.tables import Base, User, Role, Address, Client, Event, Company, Contract
 from utils.basic_utils import pwd_hashed
-from views.basic_view import show_error, show
+from views.display import View
 from config_db_sqlalchemy import database_initialization
+
+view = View()
 
 
 class DatabaseManager:
@@ -25,4 +27,4 @@ class DatabaseManager:
     def connection_close(self):
         if self.session is not None:
             self.session.close()
-            show("connection closed")
+            View.basic("connection closed")

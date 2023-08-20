@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlalchemy import ForeignKey, String, Integer, Float, DateTime, Boolean
+from sqlalchemy import ForeignKey, String, Integer, Float, Boolean, Date, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 
@@ -17,11 +17,12 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(100))
     password: Mapped[str] = mapped_column(String(100))
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+    contracts: Mapped[List["Contract"]] = relationship(back_populates="commercial")
 
-    def __repr__(self) -> str:
-        return (
-            f"id={self.id}, name={self.name}, role={self.role_id}, email={self.email}"
-        )
+    # def __repr__(self) -> str:
+    #     return (
+    #         f"id={self.id}, name={self.name}, role={self.role_id}, email={self.email}"
+    #     )
 
 
 class Role(Base):
@@ -56,11 +57,16 @@ class Client(Base):
     __tablename__ = "clients"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    contracts: Mapped[List["Contract"]] = relationship(back_populates="client")
     name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(100))
     phone: Mapped[str] = mapped_column(String(100))
-    contact_first: Mapped[str] = mapped_column(String)
-    contact_last: Mapped[str] = mapped_column(String)
+    contact_first: Mapped[datetime.date] = mapped_column(
+        Date, server_default=func.current_date()
+    )
+    contact_last: Mapped[datetime.date] = mapped_column(
+        Date, server_default=func.current_date()
+    )
     company_id: Mapped[int] = mapped_column(ForeignKey("companies.id"))
     commercial_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
@@ -78,11 +84,15 @@ class Event(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     contract_id: Mapped[int] = mapped_column(ForeignKey("contracts.id"))
     support_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    date_begin: Mapped[datetime.datetime] = mapped_column(DateTime)
-    date_end: Mapped[datetime.datetime] = mapped_column(DateTime)
+    date_begin: Mapped[datetime.date] = mapped_column(
+        Date, server_default=func.current_date()
+    )
+    date_end: Mapped[datetime.date] = mapped_column(
+        Date, server_default=func.current_date()
+    )
     address_id: Mapped[int] = mapped_column(ForeignKey("addresses.id"))
-    number_attendee: Mapped[int] = mapped_column(Integer)
-    note: Mapped[str] = mapped_column(String(500))
+    number_attendee: Mapped[int] = mapped_column(Integer, default=0)
+    note: Mapped[Optional[str]] = mapped_column(String(500), default="")
 
     def __repr__(self) -> str:
         return f"id={self.id}, contract_id={self.contract_id}, support_id={self.support_id}, addres_id={self.address_id}, date={self.date_begin} - {self.date_end}."
@@ -95,11 +105,15 @@ class Contract(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"))
-    date_creation: Mapped[datetime.datetime] = mapped_column(DateTime)
-    cost_total: Mapped[float] = mapped_column(Float)
-    cost_remaining: Mapped[float] = mapped_column(Float)
+    client: Mapped["Client"] = relationship(back_populates="contracts")
+    date_creation: Mapped[datetime.date] = mapped_column(
+        Date, server_default=func.current_date()
+    )
+    cost_total: Mapped[float] = mapped_column(Float, default=0.0)
+    cost_remaining: Mapped[float] = mapped_column(Float, default=cost_total)
     valid: Mapped[bool] = mapped_column(Boolean)
     commercial_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    commercial: Mapped["User"] = relationship(back_populates="contracts")
 
     def __repr__(self) -> str:
         return f"id={self.id}, client_id={self.client_id}, commercial_id={self.commercial_id}, valid={self.valid}, cost={self.cost_total}, remaining={self.cost_remaining}."

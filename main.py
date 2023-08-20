@@ -13,26 +13,16 @@ def main():
     engine = create_engine(db_uri, echo=False)
     db_manager = DatabaseManager(engine, db_uri)
     db_manager.check_database()
-    auth_controller = Authentication_controller(engine)
+    session = sessionmaker(engine, expire_on_commit=False)
 
-    auth_controller.login()
-    user_instance = auth_controller.user_instance
-    session = sessionmaker(engine)
+    # menu = ActionsManager(session=session, user=user_instance)
+    # menu.start()
+    # auth_controller = Authentication_controller(engine)
+    # auth_controller.login()
+    # user_instance = auth_controller.user_instance
 
-    # with session.begin() as sessionquimarche:
-    menu = ActionsManager(session=session, user=user_instance)
-    menu.start()
-
-    # session = sessionmaker(engine)
-    # with session.begin() as sessionX:
-    #     action = db_actions(sessionX, db_uri, user_session)
-    #     print(action.read_clients_all())
-
-    #     choice_id = int(input("enter id : "))
-    #     choice_name = input("enter name : ")
-
-    #     print(action.read_clients_one_id(choice_id))
-    #     print(action.read_clients_one_name(choice_name))
+    menu = ActionsManager(session=session)
+    menu.signin()
 
 
 if __name__ == "__main__":

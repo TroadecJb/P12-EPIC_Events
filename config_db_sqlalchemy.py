@@ -2,6 +2,7 @@ import sqlalchemy
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 import bcrypt
+from datetime import date
 
 
 from models.tables import Base, User, Role, Address, Client, Event, Company, Contract
@@ -39,8 +40,8 @@ def database_initialization(engine, db):
                 name="test_client",
                 email="mail",
                 phone="06",
-                contact_first="hier",
-                contact_last="aujourd'hui",
+                # contact_first=date.today(),
+                # contact_last=date.today(),
                 company_id=1,
                 commercial_id=2,
             )
@@ -48,8 +49,8 @@ def database_initialization(engine, db):
                 name="test_client_2",
                 email="mail",
                 phone="07",
-                contact_first="hier",
-                contact_last="aujourd'hui",
+                # contact_first=date.today(),
+                # contact_last=date.today(),
                 company_id=1,
                 commercial_id=2,
             )
@@ -74,6 +75,32 @@ def database_initialization(engine, db):
                 role_id=3,
             )
 
+            test_support = User(
+                name="suppo",
+                phone="",
+                email="support@mail.test",
+                password=pwd,
+                role_id=4,
+            )
+
+            test_contract = Contract(
+                client_id=1,
+                date_creation=date(2020, 12, 20),
+                cost_total=1000.5,
+                cost_remaining=0.0,
+                valid=True,
+                commercial_id=2,
+            )
+
+            test_event = Event(
+                contract_id=1,
+                support_id=3,
+                # date_begin=date.today(),
+                # date_end=date.today(),
+                address_id=1,
+                number_attendee=55,
+            )
+
             baseAdmin = User(
                 name="admin",
                 phone="",
@@ -94,6 +121,9 @@ def database_initialization(engine, db):
                     test_company,
                     test_address,
                     test_commerical,
+                    test_support,
+                    test_contract,
+                    test_event,
                 ]
             )
             session.commit()

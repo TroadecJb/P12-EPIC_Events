@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import select, update, delete, insert
 from sqlalchemy.exc import InvalidRequestError, CompileError
-from models.tables import User, Client, Contract, Event, Company, Address
+from models.tables import User, Client, Contract, Event  # , Company, Address
 
 from views.display import View
 from controllers.actions_utils import ask_values
@@ -43,7 +43,14 @@ def read_event_all(session, readonly=True, **kwargs):
 
 def read_event_by_client_name(session, readonly=True, **kwargs):
     client_name = view.user_input(detail="client's name")
-    stmt = select(Event).join(Client.events.and_(Client.name.contains(client_name)))
+    stmt = (
+        select(Event)
+        .join(Contract)
+        .join(Client)
+        .where(Client.name.contains(client_name))
+    )
+
+    # stmt = select(Event).filter(Event.contract.client.contains(client_name)).all()
     result = session.execute(stmt).all()
     if len(result) > 1:
         if readonly:
@@ -98,7 +105,7 @@ def read_event_by_support_name(session, readonly=True, **kwargs):
     If readonly=False return either list of obj or single obj
     """
     support_name = view.user_input(detail="commercial's name")
-    stmt = select(Event).join(User.events.and_(User.name.contains(support_name)))
+    stmt = select(Event).join(User).where(User.name.contains(support_name))
     result = session.execute(stmt).all()
     if len(result) > 1:
         if readonly:
@@ -148,7 +155,28 @@ def read_event_by_attendee(session, readonly=True, **kwargs):
                 return result[0]
 
 
-def create_event(session, readonly=True, **kwargs):
+def read_event_in_charge(session, readonly=True, user=None, **kwargs):
+    stmt = select(Event).where(Event.support.id == user.id)
+    result = session.execute(stmt).all()
+    if len(result) > 1:
+        if readonly:
+            view.basic_list(result)
+            session.close()
+            return
+        return result
+    elif len(result) == 1:
+        if readonly:
+            view.basic(result[0])
+            session.close()
+            return
+        return result[0]
+    else:
+        view.basic(message="no match")
+        session.close()
+        return
+
+
+def create_event(session, readonly=False, user=None, **kwargs):
     values = {
         "contract": None,
         "date_begin": None,
@@ -156,10 +184,16 @@ def create_event(session, readonly=True, **kwargs):
         "attendee": None,
         "support": None,
         "note": None,
+        "address": None,
     }
     for k in values.keys():
         if k == "contract":
-            contract = actions_contracts.read_contract(session, readonly=False)
+            if user.role_id == 3:
+                contract = actions_contracts.read_contract_in_charge(
+                    session, readonly=False, user=user, **kwargs
+                )
+            else:
+                contract = actions_contracts.read_contract(session, readonly=False)
             if type(contract) is list:
                 contract = view.select_from(contract)
             values[k] = contract.id
@@ -185,8 +219,34 @@ def create_event(session, readonly=True, **kwargs):
         return
 
 
-def update_event(session, readonly=True, **kwargs):
-    events = read_event(session, readonly, **kwargs)
+def update_event(session, readonly=True, user=None, **kwargs):
+    # if user.role_id == 4:
+    #     events = read_event_in_charge(session, readonly=False, user=user, **kwargs)
+    # else:
+    #     events = read_event(session, readonly=False, **kwargs)
+    events = read_event(session, readonly=False, **kwargs)
+    selected_event = None
+    if type(events) is list:
+        selected_event = view.select_from(events)
+    else:
+        selected_event = events
+    view.basic(selected_event)
+    values = ask_values()
+    stmt = update(Event).where(Event.id == selected_event.id).values(values)
+    try:
+        session.execute(stmt)
+        session.commit()
+        view.basic(message="update successful")
+    except CompileError as er:
+        view.error_message(er)
+        session.rollback()
+    finally:
+        session.close()
+        return
+
+
+def update_event_in_charge(session, readonly=False, user=None, **kwargs):
+    events = read_event_in_charge(session, readonly, user=user, **kwargs)
     selected_event = None
     if type(events) is list:
         selected_event = view.select_from(events)

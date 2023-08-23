@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import select, update, delete, insert
 from sqlalchemy.exc import InvalidRequestError, CompileError
-from models.tables import User, Client, Contract, Event, Company, Address
+from models.tables import User, Client, Contract, Event  # , Company, Address
 
 from views.display import View
 from controllers.actions_utils import ask_values
@@ -22,14 +22,14 @@ def read_contract(session, readonly=True, **kwargs):
         "cost": read_contract_by_cost,
         "status": read_contract_by_status,
     }
-    view.basic(message="select the field to use")
+    view.basic(message="select the field to search for the contract")
     view.dict_k(filtering_options)
     choice = view.user_input()
     if choice in filtering_options.keys():
         return filtering_options[choice](session, readonly, **kwargs)
     else:
         view.error_input()
-        return read_contract(session, readonly, **kwargs)
+        return read_contract(session, readonly=readonly, **kwargs)
 
 
 def read_contracts_all(session, readonly=True, **kwargs):
@@ -52,10 +52,8 @@ def read_contract_by_client_name(session, readonly=True, **kwargs):
     If readonly=False return either list of obj or single obj
     """
     client_name = view.user_input(detail="client's name")
-    stmt = select(Contract).join(
-        Client.contracts.and_(Client.name.contains(client_name))
-    )
-    result = session.execute(stmt).all()
+    stmt = select(Contract).join(Client).where(Client.name.contains(client_name))
+    result = session.scalars(stmt).all()
 
     if len(result) > 1:
         if readonly:
@@ -77,9 +75,7 @@ def read_contract_by_commerical_name(session, readonly=True, **kwargs):
     If readonly=False return either list of obj or single obj
     """
     commercial_name = view.user_input(detail="commercial's name")
-    stmt = select(Contract).join(
-        User.contracts.and_(User.name.contains(commercial_name))
-    )
+    stmt = select(Contract).join(User).where(User.name.contains(commercial_name))
     result = session.execute(stmt).all()
     if len(result) > 1:
         if readonly:
@@ -194,8 +190,30 @@ def read_contract_by_cost(session, readonly=True, **kwargs):
                 return result[0]
 
 
-def update_contract(session, readonly=False, **kwargs):
-    contracts = read_contract(session, readonly, **kwargs)
+def read_contract_in_charge(session, readonly=True, user=None, **kwargs):
+    stmt = select(Contract).where(Contract.commercial.id == user.id)
+    result = session.execute(stmt).all()
+    if len(result) > 1:
+        if readonly:
+            view.basic_list(result)
+            session.close()
+            return
+        return result
+    else:
+        if readonly:
+            view.basic(result[0])
+            session.close()
+            return
+        return result[0]
+
+
+def update_contract(session, readonly=False, user=None, **kwargs):
+    if user.role_id == 3:
+        contracts = read_contract_in_charge(
+            session, readonly=False, user=user, **kwargs
+        )
+    else:
+        contracts = read_contract(session, readonly, **kwargs)
     selected_contract = None
     if type(contracts) is list:
         selected_contract = view.select_from(contracts)
@@ -228,40 +246,48 @@ def delete_contract(session, readonly=False, **kwargs):
 
 def create_contract(session, readonly=False, **kwargs):
     values = {
-        "client": None,
+        "client_id": None,
         "date_creation": None,
         "cost_total": None,
         "cost_remaining": None,
         "valid": None,
-        "commercial": None,
+        "commercial_id": None,
     }
 
     for k in values.keys():
-        if k == "client":
+        if k == "client_id":
             client = actions_clients.read_client_by_name(session, readonly=False)
             if type(client) is list:
                 client = view.select_from(client)
             values[k] = client.id
-        elif k == "date":
+        elif k in "date_creation":
             date = view.user_input("YYYY,MM,DD")
             date = [int(x) for x in date.split(",")]
             input_date = datetime.date(date[0], date[1], date[2])
             values[k] = input_date
         elif k in ["cost_total", "cost_remaing"]:
-            values[k] = float(view.user_input())
+            values[k] = float(view.user_input(detail=k))
         elif k == "valid":
-            valid = view.user_input(detail="True or False").lower()
+            valid = view.user_input(detail="Signed: True or False").lower()
             choice = {"true": True, "false": False}
             values[k] = choice[valid]
-        elif k == "commercial":
-            commercial = actions_users.read_user_by_name(session, readonly=False)
+        elif k == "commercial_id":
+            commercial = actions_users.read_user_by_name(
+                session, readonly=False, user_role="commercial"
+            )
             if type(commercial) is list:
                 commercial = view.select_from(commercial)
             values[k] = commercial.id
         else:
-            values[k] = view.user_input()
-
-        session.execute(insert(Contract).values(values))
+            values[k] = view.user_input(detail=k)
+    stmt = insert(Contract).values(values)
+    try:
+        session.execute(stmt)
         session.commit()
+        view.basic(message="contract created")
+    except CompileError as er:
+        view.error_message(er)
+        session.rollback()
+    finally:
         session.close()
         return

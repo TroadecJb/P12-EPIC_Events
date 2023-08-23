@@ -2,10 +2,14 @@ bcrypt==4.0.1
 black==23.7.0
 click==8.1.6
 greenlet==2.0.2
+inquirerpy==0.3.4
 mypy-extensions==1.0.0
 packaging==23.1
 pathspec==0.11.2
+pfzy==0.3.4
 platformdirs==3.10.0
+prompt-toolkit==3.0.39
 SQLAlchemy==2.0.19
 tomli==2.0.1
 typing_extensions==4.7.1
+wcwidth==0.2.6

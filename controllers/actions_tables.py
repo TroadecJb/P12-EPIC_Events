@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
 from controllers.permissions import Permission
-from models.tables import User, Client, Contract, Event, Company, Address
+from models.tables import User, Client, Contract, Event  # , Company, Address
 from views.display import View
 
 from controllers.authentication import Authentication_controller
@@ -21,7 +21,7 @@ view = View()
 
 class ActionsManager:
     actions_admin = {
-        "logout": "",
+        "\033[35m" "logout" "\033[39m": "",
         "clients": {
             1: actions_clients.read_clients,
             2: actions_clients.create_client,
@@ -30,11 +30,23 @@ class ActionsManager:
         },
         "contracts": {
             1: actions_contracts.read_contract,
+            2: actions_contracts.create_contract,
+            3: actions_contracts.update_contract,
+            4: actions_contracts.delete_contract,
         },
         "events": {
             1: actions_events.read_event,
+            2: actions_events.create_event,
+            3: actions_events.update_event,
+            4: actions_events.delete_event,
         },
-        "users": {1: actions_users.read_users},
+        "users": {
+            1: actions_users.read_user,
+            2: actions_users.create_user,
+            3: actions_users.update_user,
+            4: actions_users.delete_user,
+            5: actions_users.change_password,
+        },
     }
     actions_manager = {
         "logout": "",
@@ -51,10 +63,11 @@ class ActionsManager:
             2: actions_events.update_event,
         },
         "users": {
-            1: actions_users.read_users,
+            1: actions_users.read_user,
             2: actions_users.create_user,
             3: actions_users.update_user,
             4: actions_users.delete_user,
+            5: actions_users.change_password,
         },
     }
     actions_sale = {
@@ -66,11 +79,14 @@ class ActionsManager:
         },
         "contracts": {
             1: actions_contracts.read_contract,
-            2: actions_contracts.update_contract_in_charge,
+            2: actions_contracts.update_contract,
         },
         "events": {
             1: actions_events.read_event,
             2: actions_events.create_event,
+        },
+        "users": {
+            1: actions_users.change_password,
         },
     }
     action_support = {
@@ -82,9 +98,12 @@ class ActionsManager:
             1: actions_contracts.read_contract,
         },
         "events": {
-            1: actions_events.read_events,
-            2: actions_events.read_events_in_charge,
+            1: actions_events.read_event,
+            2: actions_events.read_event_in_charge,
             3: actions_events.update_event_in_charge,
+        },
+        "users": {
+            1: actions_users.change_password,
         },
     }
 

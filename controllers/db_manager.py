@@ -1,7 +1,14 @@
 from sqlalchemy import select, text, create_engine
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
-from models.tables import Base, User, Role, Address, Client, Event, Company, Contract
+from models.tables import (
+    Base,
+    User,
+    Role,
+    Client,
+    Event,
+    Contract,
+)  # , Address, Company
 from utils.basic_utils import pwd_hashed
 from views.display import View
 from config_db_sqlalchemy import database_initialization

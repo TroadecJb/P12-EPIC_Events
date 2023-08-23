@@ -5,10 +5,41 @@ import bcrypt
 from datetime import date
 
 
-from models.tables import Base, User, Role, Address, Client, Event, Company, Contract
+from models.tables import Base, User, Role, Client, Event, Contract  # ,Address, Company
 from views.display import View
 
 view = View()
+
+
+class fg:
+    BLACK = "\033[30m"
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    MAGENTA = "\033[35m"
+    CYAN = "\033[36m"
+    WHITE = "\033[37m"
+    RESET = "\033[39m"
+
+
+class bg:
+    BLACK = "\033[40m"
+    RED = "\033[41m"
+    GREEN = "\033[42m"
+    YELLOW = "\033[43m"
+    BLUE = "\033[44m"
+    MAGENTA = "\033[45m"
+    CYAN = "\033[46m"
+    WHITE = "\033[47m"
+    RESET = "\033[49m"
+
+
+class other_style:
+    BRIGHT = "\033[1m"
+    DIM = "\033[2m"
+    NORMAL = "\033[22m"
+    RESET_ALL = "\033[0m"
 
 
 def database_initialization(engine, db):
@@ -21,13 +52,13 @@ def database_initialization(engine, db):
     Base.metadata.create_all(engine)
 
     with session.begin() as session:
-        message = f"Checking if {db} exists or not..."
+        message = f"{bg.YELLOW}Checking if {db} exists or not...{bg.RESET}"
         view.basic(message)
         check_empty = session.query(Role).first()
 
         if check_empty is None:
-            view.basic(f"Database does not exist.")
-            view.basic(f"Creating database: {db}")
+            view.basic(f"{fg.YELLOW}Database does not exist.{fg.RESET}")
+            view.basic(f"{fg.YELLOW}Creating database: {db}{fg.RESET}")
 
             admin = Role(name="admin")
             sale = Role(name="sale")
@@ -40,31 +71,13 @@ def database_initialization(engine, db):
                 name="test_client",
                 email="mail",
                 phone="06",
-                # contact_first=date.today(),
-                # contact_last=date.today(),
-                company_id=1,
                 commercial_id=2,
             )
             test_client_2 = Client(
                 name="test_client_2",
                 email="mail",
                 phone="07",
-                # contact_first=date.today(),
-                # contact_last=date.today(),
-                company_id=1,
                 commercial_id=2,
-            )
-
-            test_company = Company(
-                name="test_company",
-                address_id=1,
-            )
-
-            test_address = Address(
-                number="1",
-                street="rue",
-                city="ville",
-                code=22,
             )
 
             test_commerical = User(
@@ -95,9 +108,6 @@ def database_initialization(engine, db):
             test_event = Event(
                 contract_id=1,
                 support_id=3,
-                # date_begin=date.today(),
-                # date_end=date.today(),
-                address_id=1,
                 number_attendee=55,
             )
 
@@ -118,8 +128,8 @@ def database_initialization(engine, db):
                     baseAdmin,
                     test_client,
                     test_client_2,
-                    test_company,
-                    test_address,
+                    # test_company,
+                    # test_address,
                     test_commerical,
                     test_support,
                     test_contract,
@@ -128,12 +138,14 @@ def database_initialization(engine, db):
             )
             session.commit()
 
-            view.basic(f"Database created and initialized.")
+            view.basic(f"{bg.GREEN}Database created and initialized{bg.RESET}")
             session.close()
             return True
 
         elif check_empty is not None:
-            view.basic(f"Database exists. Succesfully connected to {db}.")
+            view.basic(
+                f"{bg.GREEN}Database exists. Succesfully connected to {db}{bg.RESET}"
+            )
             session.close()
             return True
         else:

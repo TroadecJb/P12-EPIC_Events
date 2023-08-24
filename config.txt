@@ -1,0 +1,7 @@
+[config]
+db = sqlite:///epic_events.sqlite
+sentry_dsn = 
+
+[admin_basic]
+email = mail@ad.min
+password = ChangeMe

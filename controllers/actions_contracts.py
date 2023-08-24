@@ -1,11 +1,12 @@
 import datetime
 from sqlalchemy import select, update, delete, insert
-from sqlalchemy.exc import InvalidRequestError, CompileError
-from models.tables import User, Client, Contract, Event  # , Company, Address
+from sqlalchemy.exc import CompileError
+from models.tables import User, Client, Contract
 
 from views.display import View
 from controllers.actions_utils import ask_values
 from controllers import actions_clients, actions_users
+from sentry_sdk import capture_message
 
 view = View()
 
@@ -21,15 +22,13 @@ def read_contract(session, readonly=True, **kwargs):
         "date": read_contract_by_date,
         "cost": read_contract_by_cost,
         "status": read_contract_by_status,
+        "-BACK-": "back",
     }
-    view.basic(message="select the field to search for the contract")
-    view.dict_k(filtering_options)
-    choice = view.user_input()
-    if choice in filtering_options.keys():
-        return filtering_options[choice](session, readonly, **kwargs)
+    action = view.select_action(message="", action_dict=filtering_options)
+    if action == "back":
+        return
     else:
-        view.error_input()
-        return read_contract(session, readonly=readonly, **kwargs)
+        return action(session, readonly, **kwargs)
 
 
 def read_contracts_all(session, readonly=True, **kwargs):
@@ -88,7 +87,10 @@ def read_contract_by_commerical_name(session, readonly=True, **kwargs):
             view.basic(result[0])
             session.close()
             return
-        return result[0]
+        else:
+            if view.confirm():
+                return result[0]
+            return
 
 
 def read_contract_by_status(session, readonly=True, **kwargs):
@@ -96,8 +98,8 @@ def read_contract_by_status(session, readonly=True, **kwargs):
     User can filter the contracts by their valid status.
     if readonly=False return either list of obj or signe obj.
     """
-    status = view.user_input(detail="signed?")
-    if status in ["y", "ye", "yes"]:
+    contract_valid = view.confirm(message="signed?")
+    if contract_valid:
         status = True
     else:
         status = False
@@ -115,12 +117,15 @@ def read_contract_by_status(session, readonly=True, **kwargs):
             view.basic(result[0])
             session.close()
             return
-        return result[0]
+        else:
+            if view.confirm():
+                return result[0]
+            return
 
 
 def read_contract_by_date(session, readonly=True, **kwargs):
-    specific_date = view.user_input(detail="specific date?")
-    if specific_date in ["y", "yes", "yes"]:
+    specific_date = view.confirm(message="specific date?")
+    if specific_date:
         date = view.user_input("YYYY,MM,DD")
         date = [int(x) for x in date.split(",")]
         date = datetime.date(date[0], date[1], date[2])
@@ -144,7 +149,10 @@ def read_contract_by_date(session, readonly=True, **kwargs):
                 view.basic(result[0])
                 session.close()
                 return
-            return result[0]
+            else:
+                if view.confirm():
+                    return result[0]
+                return
 
 
 def read_contract_by_cost(session, readonly=True, **kwargs):
@@ -187,7 +195,9 @@ def read_contract_by_cost(session, readonly=True, **kwargs):
                 session.close()
                 return
             else:
-                return result[0]
+                if view.confirm():
+                    return result[0]
+                return
 
 
 def read_contract_in_charge(session, readonly=True, user=None, **kwargs):
@@ -204,7 +214,10 @@ def read_contract_in_charge(session, readonly=True, user=None, **kwargs):
             view.basic(result[0])
             session.close()
             return
-        return result[0]
+        else:
+            if view.confirm():
+                return result[0]
+            return
 
 
 def update_contract(session, readonly=False, user=None, **kwargs):
@@ -226,6 +239,7 @@ def update_contract(session, readonly=False, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="update successful")
+        capture_message(f"user: {user.id} {user.name} {user.email} updated {Contract}")
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -234,17 +248,22 @@ def update_contract(session, readonly=False, user=None, **kwargs):
         return
 
 
-def delete_contract(session, readonly=False, **kwargs):
+def delete_contract(session, readonly=False, user=None, **kwargs):
     contracts = read_contract(session, readonly, **kwargs)
     selected_contract = view.select_obj_from_list(contracts)
     stmt = delete(Contract).where(Contract.id == selected_contract.id)
-    session.execute(stmt)
-    session.commit()
+    try:
+        session.execute(stmt)
+        session.commit()
+        capture_message(f"user: {user.id} {user.name} {user.email} delted {Contract}")
+        view.basic(message="contract deleted")
+    except:
+        session.rollback()
     session.close()
     return
 
 
-def create_contract(session, readonly=False, **kwargs):
+def create_contract(session, readonly=False, user=None, **kwargs):
     values = {
         "client_id": None,
         "date_creation": None,
@@ -285,6 +304,7 @@ def create_contract(session, readonly=False, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="contract created")
+        capture_message(f"user: {user.id} {user.name} {user.email} created {Contract}")
     except CompileError as er:
         view.error_message(er)
         session.rollback()

@@ -2,30 +2,7 @@ from typing import List, Optional
 from sqlalchemy import ForeignKey, String, Integer, Float, Boolean, Date, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import date
-
-
-class fg:
-    BLACK = "\033[30m"
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    WHITE = "\033[37m"
-    RESET = "\033[39m"
-
-
-class bg:
-    BLACK = "\033[40m"
-    RED = "\033[41m"
-    GREEN = "\033[42m"
-    YELLOW = "\033[43m"
-    BLUE = "\033[44m"
-    MAGENTA = "\033[45m"
-    CYAN = "\033[46m"
-    WHITE = "\033[47m"
-    RESET = "\033[49m"
+from views.color import fg, bg, style
 
 
 class Base(DeclarativeBase):
@@ -87,8 +64,6 @@ class Role(Base):
 
 
 class Client(Base):
-    """Class for client"""
-
     __tablename__ = "clients"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -119,8 +94,6 @@ class Client(Base):
 
 
 class Event(Base):
-    """Class for event"""
-
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -149,8 +122,6 @@ class Event(Base):
 
 
 class Contract(Base):
-    """Class for contract"""
-
     __tablename__ = "contracts"
 
     id: Mapped[int] = mapped_column(primary_key=True)

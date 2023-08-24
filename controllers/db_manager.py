@@ -1,15 +1,4 @@
-from sqlalchemy import select, text, create_engine
-from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
-from models.tables import (
-    Base,
-    User,
-    Role,
-    Client,
-    Event,
-    Contract,
-)  # , Address, Company
-from utils.basic_utils import pwd_hashed
 from views.display import View
 from config_db_sqlalchemy import database_initialization
 
@@ -25,13 +14,18 @@ class DatabaseManager:
         self.connection_trial = 0
 
     def check_database(self):
-        """Check if the database exists or initializes it."""
+        """
+        Check if the database exists or initializes it.
+
+        Return:
+            bool
+        """
         if database_initialization(self.engine, self.db_name):
             self.db_exist = True
         else:
             return False
 
-    def connection_close(self):
+    def close_connection(self):
         if self.session is not None:
             self.session.close()
             View.basic("connection closed")

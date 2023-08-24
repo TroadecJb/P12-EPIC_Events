@@ -1,11 +1,12 @@
 import datetime
 from sqlalchemy import select, update, delete, insert
-from sqlalchemy.exc import InvalidRequestError, CompileError
-from models.tables import User, Client, Contract, Event  # , Company, Address
+from sqlalchemy.exc import CompileError
+from models.tables import User, Client, Contract, Event
 
 from views.display import View
 from controllers.actions_utils import ask_values
-from controllers import actions_clients, actions_users, actions_contracts
+from controllers import actions_users, actions_contracts
+from sentry_sdk import capture_message
 
 view = View()
 
@@ -21,14 +22,11 @@ def read_event(session, readonly=True, **kwargs):
         "support": read_event_by_support_name,
         "number_attendee": read_event_by_attendee,
     }
-    view.basic(message="select the field to use")
-    view.dict_k(filterting_options)
-    choice = view.user_input()
-    if choice in filterting_options.keys():
-        return filterting_options[choice](session, readonly, **kwargs)
+    action = view.select_action(message="", action_dict=filterting_options)
+    if action == "back":
+        return
     else:
-        view.error_input()
-        return read_event(session, readonly, **kwargs)
+        return action(session, readonly, **kwargs)
 
 
 def read_event_all(session, readonly=True, **kwargs):
@@ -49,8 +47,6 @@ def read_event_by_client_name(session, readonly=True, **kwargs):
         .join(Client)
         .where(Client.name.contains(client_name))
     )
-
-    # stmt = select(Event).filter(Event.contract.client.contains(client_name)).all()
     result = session.execute(stmt).all()
     if len(result) > 1:
         if readonly:
@@ -212,18 +208,20 @@ def create_event(session, readonly=False, user=None, **kwargs):
             values[k] = int(attendee)
         else:
             values[k] = view.user_input()
-
-        session.execute(insert(Event).values(values))
-        session.commit()
-        session.close()
-        return
+        stmt = insert(Event).values(values)
+        try:
+            session.execute(stmt)
+            session.commit()
+            capture_message(f"user: {user.id} {user.name} {user.email} created {Event}")
+        except CompileError as er:
+            view.error_message(er)
+            session.rollback()
+        finally:
+            session.close()
+            return
 
 
 def update_event(session, readonly=True, user=None, **kwargs):
-    # if user.role_id == 4:
-    #     events = read_event_in_charge(session, readonly=False, user=user, **kwargs)
-    # else:
-    #     events = read_event(session, readonly=False, **kwargs)
     events = read_event(session, readonly=False, **kwargs)
     selected_event = None
     if type(events) is list:
@@ -237,6 +235,7 @@ def update_event(session, readonly=True, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="update successful")
+        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Event}")
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -259,6 +258,7 @@ def update_event_in_charge(session, readonly=False, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="update successful")
+        capture_message(f"user: {user.id} {user.name} {user.email} updated {Event}")
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -267,11 +267,19 @@ def update_event_in_charge(session, readonly=False, user=None, **kwargs):
         return
 
 
-def delete_event(session, readonly=True, **kwargs):
+def delete_event(session, readonly=True, user=None, **kwargs):
     events = read_event(session, readonly, **kwargs)
     selected_event = view.select_obj_from_list(events)
     stmt = delete(Event).where(Event.id == selected_event.id)
-    session.execute(stmt)
-    session.commit()
-    session.close()
-    return
+    try:
+        session.execute(stmt)
+        session.commit()
+        view.basic(message="update successful")
+        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Event}")
+    except:
+        view.error_message()
+        session.rollback()
+        return
+    finally:
+        session.close()
+        return

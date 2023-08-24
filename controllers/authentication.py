@@ -1,42 +1,11 @@
 import bcrypt
 import time
 from sqlalchemy import select
-from sqlalchemy.orm import sessionmaker
-from models.tables import User, Role
+from models.tables import User
 from views.display import View
+from views.color import fg, bg, style
 
 view = View()
-
-
-class fg:
-    BLACK = "\033[30m"
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    WHITE = "\033[37m"
-    RESET = "\033[39m"
-
-
-class bg:
-    BLACK = "\033[40m"
-    RED = "\033[41m"
-    GREEN = "\033[42m"
-    YELLOW = "\033[43m"
-    BLUE = "\033[44m"
-    MAGENTA = "\033[45m"
-    CYAN = "\033[46m"
-    WHITE = "\033[47m"
-    RESET = "\033[49m"
-
-
-class other_style:
-    BRIGHT = "\033[1m"
-    DIM = "\033[2m"
-    NORMAL = "\033[22m"
-    RESET_ALL = "\033[0m"
 
 
 class Authentication_controller:
@@ -46,7 +15,15 @@ class Authentication_controller:
         self.authentication_trials = 0
 
     def login(self):
-        """Search in the database for a user with the proivided email, then check the password."""
+        """
+        Search in the database for a user with the proivided email, then check the password.
+        With a maximum amount of 3 trials to login.
+
+        Return:
+            bool : if user provided valid credentials
+            self : if invalid email / password
+            quit : after 3 failed attempted
+        """
         if self.authentication_trials >= 3:
             view.basic(f"{bg.RED}Too many attempts{bg.RESET}")
             time.sleep(3)
@@ -56,7 +33,6 @@ class Authentication_controller:
             with self.session.begin() as session:
                 stmt = select(User).where(User.email == credentials[0])
                 result = session.execute(stmt).first()
-
                 if result is not None and bcrypt.checkpw(
                     credentials[1], result.User.password
                 ):
@@ -89,5 +65,9 @@ class Authentication_controller:
                     return self.login()
 
     def logout(self):
+        """
+        Empty user_instance, needed attribute to use the rest of the script.
+        """
         self.user_instance = None
         view.basic(f"{fg.GREEN}successfully logged out!{fg.RESET}")
+        return

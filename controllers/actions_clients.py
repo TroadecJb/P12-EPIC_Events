@@ -1,9 +1,9 @@
 from sqlalchemy import select, update, delete, insert
-from sqlalchemy.exc import InvalidRequestError, CompileError
-from models.tables import User, Client, Contract, Event  # , Company, Address
+from sqlalchemy.exc import CompileError
+from models.tables import Client
 import datetime
 from views.display import View
-from controllers.actions_utils import ask_values, select_obj_from_list
+from controllers.actions_utils import ask_values
 from sentry_sdk import capture_message
 
 view = View()
@@ -14,7 +14,6 @@ def read_clients(session, readonly=True, **kwargs):
     User can choose between all clients or proceed by client's name.
     if readonly=False return either list of obj or single obj.
     """
-    # all_clients = view.user_input(detail="all?")
     all_clients = view.confirm(message="every client?")
     if readonly:
         if all_clients:
@@ -53,10 +52,8 @@ def read_client_by_name(session, readonly=True, **kwargs):
             return
     else:
         if len(result) > 1:
-            # view.basic_list(result)
             return result
         else:
-            # view.basic(result[0])
             return result
 
 
@@ -95,9 +92,9 @@ def update_client(session, user=None, **kwargs):
     stmt = update(Client).where(Client.id == client_selected.id).values(values)
     try:
         session.execute(stmt)
+        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Client}")
         session.commit()
         view.basic(message="update successful")
-        capture_message(f"Client updated:{user}")
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -117,9 +114,9 @@ def update_client_in_charge(session, user=None, **kwargs):
     stmt = update(Client).where(Client.id == client_selected.id).values(values)
     try:
         session.execute(stmt)
+        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Client}")
         session.commit()
         view.basic(message="update successful")
-        capture_message(f"Client updated:{user}")
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -134,13 +131,14 @@ def delete_client(session, user=None, **kwargs):
     stmt = delete(Client).where(Client.id == client_selected.id)
     try:
         session.execute(stmt)
+        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Client}")
         session.commit()
+        view.basic(message="deletion succesful")
     except:
         session.rollback()
         view.error_message()
         session.close()
-    capture_message(f"Client deleted:{user}")
-    view.basic(message="deletion succesful")
+        return
     session.close()
     return
 
@@ -170,19 +168,13 @@ def create_client(session, user=None):
     if confirm:
         try:
             session.execute(insert(Client).values(values))
-            capture_message(f"user: {user} added Client: {Client} {values}")
-            capture_message(f"user: {user} added Client: {values}")
-            capture_message(f"user: {user} added Client")
-            capture_message(f"user: {user.id} {user.name} {user.email} added Client")
-            print(user)
+            capture_message(f"user: {user.id} {user.name} {user.email} added {Client}")
             session.commit()
-
             view.basic(message="creation succesful")
         except CompileError as er:
             session.rollback()
         finally:
             session.close()
-            print(user)
             return
     else:
         return create_client(session=session, user=user)

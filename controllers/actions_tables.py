@@ -1,14 +1,6 @@
-from sqlalchemy import select
-from sqlalchemy.orm import sessionmaker
-from controllers.permissions import Permission
-from models.tables import User, Client, Contract, Event
 from views.display import View
 
 from controllers.authentication import Authentication_controller
-
-from InquirerPy import inquirer
-from InquirerPy.base.control import Choice
-from InquirerPy.separator import Separator
 
 from controllers import (
     actions_clients,
@@ -102,17 +94,21 @@ class ActionsManager:
     action_support = {
         "clients": {
             "read clients": actions_clients.read_clients,
+            "-BACK-": "back",
         },
         "contracts": {
             "read contracts": actions_contracts.read_contract,
+            "-BACK-": "back",
         },
         "events": {
             "read events": actions_events.read_event,
             "read eents in charge": actions_events.read_event_in_charge,
             "modify event": actions_events.update_event_in_charge,
+            "-BACK-": "back",
         },
         "users": {
             "modify password": actions_users.change_password,
+            "-BACK-": "back",
         },
         "-LOGOUT-": "logout",
         "-CLOSE-": "quit",
@@ -144,7 +140,7 @@ class ActionsManager:
 
     def start(self, user):
         view.menu_name(self.name)
-        action = view.select_table_and_action(dict=self.user_actions)
+        action = view.select_table_and_action(action_dict=self.user_actions)
         if action == "logout":
             self.auth_controller.logout()
             self.user = None

@@ -216,7 +216,7 @@ def update_contract(session, readonly=False, user=None, **kwargs):
         contracts = read_contract(session, readonly, **kwargs)
     selected_contract = None
     if type(contracts) is list:
-        selected_contract = view.select_from(contracts)
+        selected_contract = view.select_obj_from_list(contracts)
     else:
         selected_contract = contracts
     view.basic(selected_contract)
@@ -236,7 +236,7 @@ def update_contract(session, readonly=False, user=None, **kwargs):
 
 def delete_contract(session, readonly=False, **kwargs):
     contracts = read_contract(session, readonly, **kwargs)
-    selected_contract = view.select_from(contracts)
+    selected_contract = view.select_obj_from_list(contracts)
     stmt = delete(Contract).where(Contract.id == selected_contract.id)
     session.execute(stmt)
     session.commit()
@@ -258,7 +258,7 @@ def create_contract(session, readonly=False, **kwargs):
         if k == "client_id":
             client = actions_clients.read_client_by_name(session, readonly=False)
             if type(client) is list:
-                client = view.select_from(client)
+                client = view.select_obj_from_list(client)
             values[k] = client.id
         elif k in "date_creation":
             date = view.user_input("YYYY,MM,DD")
@@ -276,7 +276,7 @@ def create_contract(session, readonly=False, **kwargs):
                 session, readonly=False, user_role="commercial"
             )
             if type(commercial) is list:
-                commercial = view.select_from(commercial)
+                commercial = view.select_obj_from_list(commercial)
             values[k] = commercial.id
         else:
             values[k] = view.user_input(detail=k)

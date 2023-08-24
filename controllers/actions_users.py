@@ -138,7 +138,7 @@ def update_user(session, readonly=True, **kwargs):
     users = read_user_by_name(session, readonly=False)
     user_selected = None
     if type(users) is list:
-        user_selected = view.select_from(users)
+        user_selected = view.select_obj_from_list(users)
     else:
         user_selected = users[0]
     view.basic(user_selected)
@@ -157,7 +157,7 @@ def update_user(session, readonly=True, **kwargs):
 
 def delete_user(session, readonly=True, **kwargs):
     users = read_user_by_name(session, readonly=False)
-    user_selected = view.select_from(users)
+    user_selected = view.select_obj_from_list(users)
     stmt = delete(User).where(User.id == user_selected.id)
     session.execute(stmt)
     session.commit()

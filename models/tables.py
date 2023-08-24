@@ -42,9 +42,15 @@ class User(Base):
     password: Mapped[str] = mapped_column(String(100))
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
     role: Mapped["Role"] = relationship(back_populates="users")
-    contracts: Mapped[list["Contract"]] = relationship(back_populates="commercial")
-    clients: Mapped[list["Client"]] = relationship(back_populates="commercial")
-    events: Mapped[list["Event"]] = relationship(back_populates="support")
+    contracts: Mapped[list["Contract"]] = relationship(
+        back_populates="commercial", cascade="all, delete"
+    )
+    clients: Mapped[list["Client"]] = relationship(
+        back_populates="commercial", cascade="all, delete"
+    )
+    events: Mapped[list["Event"]] = relationship(
+        back_populates="support", cascade="all, delete"
+    )
 
     def __repr__(self) -> str:
         message = (
@@ -86,7 +92,9 @@ class Client(Base):
     __tablename__ = "clients"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    contracts: Mapped[list["Contract"]] = relationship(back_populates="client")
+    contracts: Mapped[list["Contract"]] = relationship(
+        back_populates="client", cascade="all, delete"
+    )
     name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(100))
     phone: Mapped[str] = mapped_column(String(100))
@@ -97,7 +105,9 @@ class Client(Base):
     company: Mapped[Optional[str]] = mapped_column(String(100), default=None)
     address: Mapped[Optional[str]] = mapped_column(String(400), default=None)
     commercial_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    commercial: Mapped["User"] = relationship(back_populates="clients")
+    commercial: Mapped["User"] = relationship(
+        back_populates="clients", cascade="all, delete"
+    )
 
     def __repr__(self) -> str:
         message = (
@@ -115,9 +125,13 @@ class Event(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     contract_id: Mapped[int] = mapped_column(ForeignKey("contracts.id"))
-    contract: Mapped["Contract"] = relationship(back_populates="events")
+    contract: Mapped["Contract"] = relationship(
+        back_populates="events", cascade="all, delete"
+    )
     support_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    support: Mapped["User"] = relationship(back_populates="events")
+    support: Mapped["User"] = relationship(
+        back_populates="events", cascade="all, delete"
+    )
     date_begin: Mapped[date] = mapped_column(Date, server_default=func.current_date())
     date_end: Mapped[date] = mapped_column(Date, server_default=func.current_date())
     address: Mapped[Optional[str]] = mapped_column(String(400), default=None)
@@ -141,7 +155,9 @@ class Contract(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"))
-    client: Mapped["Client"] = relationship(back_populates="contracts")
+    client: Mapped["Client"] = relationship(
+        back_populates="contracts", cascade="all, delete"
+    )
     date_creation: Mapped[date] = mapped_column(
         Date, server_default=func.current_date()
     )
@@ -149,8 +165,12 @@ class Contract(Base):
     cost_remaining: Mapped[float] = mapped_column(Float, default=cost_total)
     valid: Mapped[bool] = mapped_column(Boolean, default=False)
     commercial_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    commercial: Mapped["User"] = relationship(back_populates="contracts")
-    events: Mapped[list["Event"]] = relationship(back_populates="contract")
+    commercial: Mapped["User"] = relationship(
+        back_populates="contracts", cascade="all, delete"
+    )
+    events: Mapped[list["Event"]] = relationship(
+        back_populates="contract", cascade="all, delete"
+    )
 
     def __repr__(self) -> str:
         message = (

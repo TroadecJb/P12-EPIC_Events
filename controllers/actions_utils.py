@@ -18,5 +18,5 @@ def ask_values():
 
 
 def select_obj_from_list(list):
-    choice = view.select_from(list)
+    choice = view.select_obj_from_list(list)
     return choice

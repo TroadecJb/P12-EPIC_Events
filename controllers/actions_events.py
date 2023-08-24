@@ -195,7 +195,7 @@ def create_event(session, readonly=False, user=None, **kwargs):
             else:
                 contract = actions_contracts.read_contract(session, readonly=False)
             if type(contract) is list:
-                contract = view.select_from(contract)
+                contract = view.select_obj_from_list(contract)
             values[k] = contract.id
         elif k in ["date_begin", "date_end"]:
             date = view.user_input("YYYY,MMM,DD")
@@ -205,7 +205,7 @@ def create_event(session, readonly=False, user=None, **kwargs):
         elif k == "support":
             support = actions_users.read_user_by_name(session, readonly=False)
             if type(support) is list:
-                support = view.select_from(support)
+                support = view.select_obj_from_list(support)
             values[k] = support.id
         elif k == "attendee":
             attendee = view.user_input()
@@ -227,7 +227,7 @@ def update_event(session, readonly=True, user=None, **kwargs):
     events = read_event(session, readonly=False, **kwargs)
     selected_event = None
     if type(events) is list:
-        selected_event = view.select_from(events)
+        selected_event = view.select_obj_from_list(events)
     else:
         selected_event = events
     view.basic(selected_event)
@@ -249,7 +249,7 @@ def update_event_in_charge(session, readonly=False, user=None, **kwargs):
     events = read_event_in_charge(session, readonly, user=user, **kwargs)
     selected_event = None
     if type(events) is list:
-        selected_event = view.select_from(events)
+        selected_event = view.select_obj_from_list(events)
     else:
         selected_event = events
     view.basic(selected_event)
@@ -269,7 +269,7 @@ def update_event_in_charge(session, readonly=False, user=None, **kwargs):
 
 def delete_event(session, readonly=True, **kwargs):
     events = read_event(session, readonly, **kwargs)
-    selected_event = view.select_from(events)
+    selected_event = view.select_obj_from_list(events)
     stmt = delete(Event).where(Event.id == selected_event.id)
     session.execute(stmt)
     session.commit()

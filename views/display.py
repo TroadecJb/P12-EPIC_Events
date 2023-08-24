@@ -1,3 +1,8 @@
+from InquirerPy import inquirer
+from InquirerPy.base.control import Choice
+from InquirerPy.separator import Separator
+
+
 class fg:
     BLACK = "\033[30m"
     RED = "\033[31m"
@@ -31,11 +36,11 @@ class other_style:
 
 class View:
     def user_input(self, detail="") -> str:
-        choice = input(f"{fg.GREEN}{detail}-->{fg.RESET} ")
-        if choice == "quit":
+        choice = inquirer.text(message=detail).execute()
+        if choice.lower() == "quit":
             print("quitting")
             quit()
-        return choice.lower()
+        return choice
 
     def menu_name(self, name: str) -> str:
         print(f'\n{bg.CYAN}{name.center(40, " ")}{bg.RESET}')
@@ -49,7 +54,7 @@ class View:
     def basic_list(self, obj: list) -> str:
         for i in obj:
             print()
-            print(i[0])
+            print(i)
 
     def basic_list_index(self, obj: list) -> str:
         """Enumerate list with int index"""
@@ -83,7 +88,7 @@ class View:
 
         return email, pwd
 
-    def select_from(self, list):
+    def select_obj_from_list(self, list):
         """
         Enemurate list with int index.
         return obj from the list based on user input as index
@@ -94,4 +99,33 @@ class View:
             return list[choice - 1]
         else:
             self.error_input()
-            return self.select_from(list)
+            return self.select_obj_from_list(list)
+
+    def confirm(self, message=None):
+        proceed = inquirer.confirm(message=message, default=True).execute()
+        return proceed
+
+    def select_action(self, message=None, dict=None):
+        action = inquirer.select(
+            message=message,
+            choices=[Choice(v, name=k) for k, v in dict.items()],
+        ).execute()
+        return action
+
+    def select_table_and_action(self, dict=None):
+        action = inquirer.select(
+            message="Select table",
+            choices=[Choice(v, name=k) for k, v in dict.items()],
+        ).execute()
+        if action == "logout":
+            return "logout"
+        elif action == "quit":
+            return "quit"
+        else:
+            sub_action = inquirer.select(
+                message="Select action",
+                choices=[Choice(v, name=k) for k, v in action.items()],
+            ).execute()
+            if sub_action == "back":
+                return "back"
+            return sub_action

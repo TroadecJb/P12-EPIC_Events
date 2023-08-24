@@ -6,9 +6,22 @@ from controllers.db_manager import DatabaseManager
 from controllers.authentication import Authentication_controller
 from controllers.actions_tables import ActionsManager
 from views.display import View
+import sentry_sdk
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from InquirerPy import inquirer
+from InquirerPy.base.control import Choice
+from InquirerPy.separator import Separator
 
 
 def main():
+    sentry_sdk.init(
+        dsn="https://1a9822b93f9d3590febc7538c806553c@o4505753981026304.ingest.sentry.io/4505754045120512",
+        integrations=[
+            SqlalchemyIntegration(),
+        ],
+        traces_sample_rate=1.0,
+    )
+
     db_uri = "sqlite:///epic_events_test.sqlite"
     engine = create_engine(db_uri, echo=False)
     db_manager = DatabaseManager(engine, db_uri)

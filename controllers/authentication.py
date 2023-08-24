@@ -2,7 +2,7 @@ import bcrypt
 import time
 from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
-from models.tables import User
+from models.tables import User, Role
 from views.display import View
 
 view = View()
@@ -68,6 +68,7 @@ class Authentication_controller:
                         phone=result.User.phone,
                         email=result.User.email,
                         role_id=result.User.role_id,
+                        role=result.User.role,
                     )
                     self.authentication_trials = 0
                     session.close()

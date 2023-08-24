@@ -2,7 +2,6 @@ from typing import List, Optional
 from sqlalchemy import ForeignKey, String, Integer, Float, Boolean, Date, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import date
-from views.color import fg, bg, style
 
 
 class Base(DeclarativeBase):
@@ -31,18 +30,18 @@ class User(Base):
 
     def __repr__(self) -> str:
         message = (
-            f"{fg.MAGENTA}id {fg.RESET}= {self.id}\n"
-            f"{fg.MAGENTA}name {fg.RESET}= {self.name}\n"
-            f"{fg.MAGENTA}role{fg.RESET} = {self.role.name}\n"
-            f"{fg.MAGENTA}email{fg.RESET} = {self.email}\n"
+            f"id = {self.id}\n"
+            f"name = {self.name}\n"
+            f"role = {self.role.name}\n"
+            f"email = {self.email}\n"
         )
         if self.contracts and self.clients:
             message += (
-                f"{fg.MAGENTA}contracts {fg.RESET}= {[(contract.client.name, str(contract.valid)) for contract in self.contracts]}\n"
-                f"{fg.MAGENTA}clients {fg.RESET}= {[client.name for client in self.clients]}\n"
+                f"contracts = {[(contract.client.name, str(contract.valid)) for contract in self.contracts]}\n"
+                f"clients = {[client.name for client in self.clients]}\n"
             )
         elif self.events:
-            message += f"{fg.MAGENTA}events {fg.RESET}= {[(event.contract.client.name, str(event.date_begin), str(event.date_end)) for event in self.events]}\n"
+            message += f"events = {[(event.contract.client.name, str(event.date_begin), str(event.date_end)) for event in self.events]}\n"
         else:
             pass
         return message
@@ -56,10 +55,7 @@ class Role(Base):
     users: Mapped[list["User"]] = relationship(back_populates="role")
 
     def __repr__(self) -> str:
-        message = (
-            f"{fg.MAGENTA}id {fg.RESET} = {self.id}\n"
-            f"{fg.MAGENTA}name {fg.RESET} = {self.name}\n"
-        )
+        message = f"id  = {self.id}\n" f"name  = {self.name}\n"
         return message
 
 
@@ -86,9 +82,7 @@ class Client(Base):
 
     def __repr__(self) -> str:
         message = (
-            f"{fg.MAGENTA}name {fg.RESET}= {self.name}\n"
-            f"{fg.MAGENTA}email {fg.RESET}= {self.email}\n"
-            f"{fg.MAGENTA}phone {fg.RESET}= {self.phone}\n"
+            f"name = {self.name}\n" f"email = {self.email}\n" f"phone = {self.phone}\n"
         )
         return message
 
@@ -113,10 +107,10 @@ class Event(Base):
 
     def __repr__(self) -> str:
         message = (
-            f"{fg.MAGENTA}contract id {fg.RESET}= {self.contract_id}\n"
-            f"{fg.MAGENTA}contract {fg.RESET}= {self.contract.client.name}\n"
-            f"{fg.MAGENTA}support {fg.RESET}= {self.support.name}\n"
-            f"{fg.MAGENTA}date {fg.RESET}= {self.date_begin} - {self.date_end}\n"
+            f"contract id = {self.contract_id}\n"
+            f"contract = {self.contract.client.name}\n"
+            f"support = {self.support.name}\n"
+            f"date = {self.date_begin} - {self.date_end}\n"
         )
         return message
 
@@ -145,11 +139,11 @@ class Contract(Base):
 
     def __repr__(self) -> str:
         message = (
-            f"{fg.MAGENTA}id {fg.RESET}=  {self.id}\n"
-            f"{fg.MAGENTA}client {fg.RESET}= {self.client.name}\n"
-            f"{fg.MAGENTA}commercial {fg.RESET}= {self.commercial.name}\n"
-            f"{fg.MAGENTA}valid {fg.RESET}= {self.valid}\n"
-            f"{fg.MAGENTA}cost {fg.RESET}= {self.cost_total}\n"
-            f"{fg.MAGENTA}remaining {fg.RESET}= {self.cost_remaining}\n"
+            f"id =  {self.id}\n"
+            f"client = {self.client.name}\n"
+            f"commercial = {self.commercial.name}\n"
+            f"valid = {self.valid}\n"
+            f"cost = {self.cost_total}\n"
+            f"remaining = {self.cost_remaining}\n"
         )
         return message

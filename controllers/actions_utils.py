@@ -7,10 +7,10 @@ def ask_values():
     new_values_dict = {}
     adding = True
     while adding:
-        field = view.user_input(detail="field name")
+        field = view.user_input(detail="name of the field to modify")
         new_values_dict[field] = view.user_input(detail="new value")
-        keep = view.user_input(detail="modify other field?")
-        if keep != "y":
+        keep = view.confirm(detail="modify any other field?")
+        if keep:
             adding = False
         else:
             pass

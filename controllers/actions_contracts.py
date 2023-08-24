@@ -227,11 +227,7 @@ def update_contract(session, readonly=False, user=None, **kwargs):
         )
     else:
         contracts = read_contract(session, readonly, **kwargs)
-    selected_contract = None
-    if type(contracts) is list:
-        selected_contract = view.select_obj_from_list(contracts)
-    else:
-        selected_contract = contracts
+    selected_contract = view.select_obj_from_list(contracts)
     view.basic(selected_contract)
     values = ask_values()
     stmt = update(Contract).where(Contract.id == selected_contract.id).values(values)
@@ -239,7 +235,9 @@ def update_contract(session, readonly=False, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="update successful")
-        capture_message(f"user: {user.id} {user.name} {user.email} updated {Contract}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} updated {selected_contract.id} {selected_contract.name} with {values.items()}"
+        )
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -255,7 +253,9 @@ def delete_contract(session, readonly=False, user=None, **kwargs):
     try:
         session.execute(stmt)
         session.commit()
-        capture_message(f"user: {user.id} {user.name} {user.email} delted {Contract}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} delted {selected_contract.id} {selected_contract}"
+        )
         view.basic(message="contract deleted")
     except:
         session.rollback()
@@ -304,7 +304,9 @@ def create_contract(session, readonly=False, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="contract created")
-        capture_message(f"user: {user.id} {user.name} {user.email} created {Contract}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} created Contract {values.items()}"
+        )
     except CompileError as er:
         view.error_message(er)
         session.rollback()

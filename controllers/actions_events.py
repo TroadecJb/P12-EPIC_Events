@@ -212,7 +212,9 @@ def create_event(session, readonly=False, user=None, **kwargs):
         try:
             session.execute(stmt)
             session.commit()
-            capture_message(f"user: {user.id} {user.name} {user.email} created {Event}")
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} created Event {values.items()}"
+            )
         except CompileError as er:
             view.error_message(er)
             session.rollback()
@@ -223,11 +225,7 @@ def create_event(session, readonly=False, user=None, **kwargs):
 
 def update_event(session, readonly=True, user=None, **kwargs):
     events = read_event(session, readonly=False, **kwargs)
-    selected_event = None
-    if type(events) is list:
-        selected_event = view.select_obj_from_list(events)
-    else:
-        selected_event = events
+    selected_event = view.select_obj_from_list(events)
     view.basic(selected_event)
     values = ask_values()
     stmt = update(Event).where(Event.id == selected_event.id).values(values)
@@ -235,7 +233,9 @@ def update_event(session, readonly=True, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="update successful")
-        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Event}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} deleted {selected_event}"
+        )
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -246,11 +246,7 @@ def update_event(session, readonly=True, user=None, **kwargs):
 
 def update_event_in_charge(session, readonly=False, user=None, **kwargs):
     events = read_event_in_charge(session, readonly, user=user, **kwargs)
-    selected_event = None
-    if type(events) is list:
-        selected_event = view.select_obj_from_list(events)
-    else:
-        selected_event = events
+    selected_event = view.select_obj_from_list(events)
     view.basic(selected_event)
     values = ask_values()
     stmt = update(Event).where(Event.id == selected_event.id).values(values)
@@ -258,7 +254,9 @@ def update_event_in_charge(session, readonly=False, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="update successful")
-        capture_message(f"user: {user.id} {user.name} {user.email} updated {Event}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} updated {selected_event.id} with {values.items()}"
+        )
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -275,7 +273,9 @@ def delete_event(session, readonly=True, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="update successful")
-        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Event}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} deleted {selected_event.id} {selected_event}"
+        )
     except:
         view.error_message()
         session.rollback()

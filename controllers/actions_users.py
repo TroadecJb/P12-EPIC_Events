@@ -150,7 +150,9 @@ def create_user(session, readonly=True, user=None, **kwargs):
     try:
         session.execute(stmt)
         session.commit()
-        capture_message(f"user: {user.id} {user.name} {user.email} added {User}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} added User {values.items()}"
+        )
     except:
         session.rollback()
     session.close()
@@ -159,11 +161,7 @@ def create_user(session, readonly=True, user=None, **kwargs):
 
 def update_user(session, readonly=True, user=None, **kwargs):
     users = read_user_by_name(session, readonly=False)
-    user_selected = None
-    if type(users) is list:
-        user_selected = view.select_obj_from_list(users)
-    else:
-        user_selected = users[0]
+    user_selected = view.select_obj_from_list(users)
     view.basic(user_selected)
     values = ask_values()
     stmt = update(User).where(User.id == user_selected.id).values(values)
@@ -171,7 +169,9 @@ def update_user(session, readonly=True, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         view.basic(message="update successful")
-        capture_message(f"user: {user.id} {user.name} {user.email} updated {User}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} updated {user_selected.id} with {values.items()}"
+        )
     except CompileError as er:
         view.error_message(er)
         session.rollback()

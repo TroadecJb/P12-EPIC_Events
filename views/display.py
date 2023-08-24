@@ -47,6 +47,17 @@ class View:
         """
         print(message)
 
+    def success(self, message: str) -> str:
+        """
+        Print message in green
+
+        Args:
+            message (str) : message for contextual informations
+        Return:
+            print
+        """
+        print(f"\n{fg.GREEN}{message}{fg.RESET}")
+
     def basic_list(self, obj: list):
         """
         Print each element of a list, spaced with a blank line
@@ -146,7 +157,8 @@ class View:
             choice (any) : object selected
         """
         choice = inquirer.select(
-            message="select element :", choices=[Choice(obj) for obj in objs]
+            message="select element :",
+            choices=[Choice(obj, name=obj.name) for obj in objs],
         ).execute()
         return choice
 

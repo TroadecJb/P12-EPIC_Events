@@ -77,24 +77,22 @@ def read_client_in_charge(session, readonly=True, user=None, **kwargs):
         if len(result) > 1:
             return result
         else:
-            return result[0]
+            return result
 
 
 def update_client(session, user=None, **kwargs):
     clients = read_client_by_name(session, readonly=False)
-    client_selected = None
-    if type(clients) is list:
-        client_selected = view.select_obj_from_list(clients)
-    else:
-        client_selected = clients
+    client_selected = view.select_obj_from_list(clients)
     view.basic(client_selected)
     values = ask_values()
     stmt = update(Client).where(Client.id == client_selected.id).values(values)
     try:
         session.execute(stmt)
-        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Client}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} deleted {client_selected.id} {client_selected.name} with {values.items()}"
+        )
         session.commit()
-        view.basic(message="update successful")
+        view.success(message="update done")
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -104,19 +102,17 @@ def update_client(session, user=None, **kwargs):
 
 def update_client_in_charge(session, user=None, **kwargs):
     clients = read_client_in_charge(session, user=user, readonly=False)
-    client_selected = None
-    if type(clients) is list:
-        client_selected = view.select_obj_from_list(clients)
-    else:
-        client_selected = clients[0]
+    client_selected = view.select_obj_from_list(clients)
     view.basic(client_selected)
     values = ask_values()
     stmt = update(Client).where(Client.id == client_selected.id).values(values)
     try:
         session.execute(stmt)
-        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Client}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} upated {client_selected.id} {client_selected.name} with {values.items()}"
+        )
         session.commit()
-        view.basic(message="update successful")
+        view.success(message="update done")
     except CompileError as er:
         view.error_message(er)
         session.rollback()
@@ -131,9 +127,11 @@ def delete_client(session, user=None, **kwargs):
     stmt = delete(Client).where(Client.id == client_selected.id)
     try:
         session.execute(stmt)
-        capture_message(f"user: {user.id} {user.name} {user.email} deleted {Client}")
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} deleted {client_selected.id} {client_selected.name}"
+        )
         session.commit()
-        view.basic(message="deletion succesful")
+        view.success(message="deletion done")
     except:
         session.rollback()
         view.error_message()
@@ -168,9 +166,11 @@ def create_client(session, user=None):
     if confirm:
         try:
             session.execute(insert(Client).values(values))
-            capture_message(f"user: {user.id} {user.name} {user.email} added {Client}")
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} added Client {values.items()}"
+            )
             session.commit()
-            view.basic(message="creation succesful")
+            view.success(message="creation done")
         except CompileError as er:
             session.rollback()
         finally:

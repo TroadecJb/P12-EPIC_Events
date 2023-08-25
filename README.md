@@ -6,10 +6,10 @@ Users identified by their account can perform job's specific actions over four t
 Out of the box it uses a sqlite3 databse (comes with python), using SQLAlchemy to manage the database and setup to log with Sentry.
 
 ## Usage
-Start the main.py file.  
+Start the `main.py` file.  
 Provide valid credentials (email and password to authenticate).  
-Navigate the menus with arrow keys (inquirerpy is used to implement it) and follow the provided instructions.  
-Each user can logout so that another user can login using its own credentials.
+Navigate the menus with arrow keys (InquirerPy is used to implement it) and follow the provided instructions.  
+Each user can logout for another user to login using its own credentials.
 
 
 
@@ -21,8 +21,8 @@ section `CONFIG`:
 - **Databse**  
 By default the database will be created in the same folder as the `main.py` file under the name `epic_events.sqlite`.  
 - **Sentry**  
-Sentry DSN key is empty, you will have to provide it.  
-To create an account and your own Sentry DSN key go to their [website](https://sentry.io/welcome/)
+Sentry DSN key is empty, it has to be provided.  
+To create an account and get a Sentry DSN key, go to their [website](https://sentry.io/welcome/)
 
 section `admin_basic`:
 - The default account has admin permission level and comes with the following credentials  
@@ -60,15 +60,15 @@ See `requirements.txt` for more informations.
 
 ## Examples
 ### Navigation
-Naviation in the menu is done by using `arrow keys` and validing the choice with `enter`.  
-Confirmation prompt are either confirmed or denied with `y` or `n`.
+Menu navifation is done by using `arrow keys` and validating the choice with `enter`.  
+Confirmation prompt is either confirmed or denied with `y` or `n`.
 
 ### Input
-Input like text or numbers are sent after pressing `enter`.  
+Inputs like text or numbers are sent after pressing `enter`.  
 
-The creation of new entities (User, Client, Contract, Event) will prompt you the field you are filling (name, address, etc).  
+The creation of new entitiy (User, Client, Contract, Event) will prompt the field to fill in (email, address, price, etc).  
 
-The modification of an entity will ask you the name of the field you want to modify and then asky you the new value of this field, for example:  
+The modification of an entity (User, Client, Contract, Event) will ask the name of the field to modify, then the new value for this field. For example:
 ```
 >>> ? name of the field to modify 
 >>> name
@@ -79,6 +79,6 @@ The modification of an entity will ask you the name of the field you want to mod
 ```
 
 ## Logging
-If a valid Sentry DSN key is provided, from your dashboard errors from manipulation of the database will visible.  
-Event from valid manipulation of the database will be displayed too.  
-Each event will have `id` and  `name` from which user made the change and details about it: `creation` `modification` `deletion` and on which entity `id` and nature.  
+If a valid Sentry DSN key is provided, from your dashboard errors from manipulation of the database will be visible.  
+Event from valid database manipulation will be displayed too.  
+Each event will have the `id` and the `name` of the user who mades the changes and details about them : `creation` `modification` `deletion`, and details about the entity itself.

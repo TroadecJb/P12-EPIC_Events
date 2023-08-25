@@ -85,4 +85,5 @@ Each event will have the `id` and the `name` of the user who mades the changes a
 
 ## Database Diagram
 
-![database_epic_events](https://github.com/TroadecJb/P12-EPIC_Events/assets/110687346/3ed57003-0b72-4d92-a129-260c3c43bebd)<?xml version="1.0" encoding="UTF-8"?>
+![Diagram_epic_events_db](https://github.com/TroadecJb/P12-EPIC_Events/assets/110687346/8052f0bb-9ac6-4f04-9e55-c07b73ef3589)
+

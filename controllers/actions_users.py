@@ -142,7 +142,7 @@ def create_user(session, readonly=True, user=None, **kwargs):
             values[k] = hashed_pwd
         elif k == "role_id":
             role_dict = {"manager": 2, "sale": 3, "support": 4}
-            role = view.select_action(action_dict=role_dict)
+            role = view.select_action(message="Select role", action_dict=role_dict)
             values[k] = role
         else:
             values[k] = view.user_input(detail=k)

@@ -26,8 +26,8 @@ To create an account and your own Sentry DSN key go to their [website](https://s
 
 section `admin_basic`:
 - The default account has admin permission level and comes with the following credentials  
-**email =** mail@ad.min  
-**password =** ChangeMe
+**email =** `mail@ad.min`  
+**password =** `ChangeMe`
 - Those credentials can be change in the `config.txt` file before initializing the databse (done at first start).
 - The password can also be change at any point in the programm even after the first start.
 

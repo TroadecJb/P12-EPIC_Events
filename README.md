@@ -82,3 +82,8 @@ The modification of an entity (User, Client, Contract, Event) will ask the name 
 If a valid Sentry DSN key is provided, from your dashboard errors from manipulation of the database will be visible.  
 Event from valid database manipulation will be displayed too.  
 Each event will have the `id` and the `name` of the user who mades the changes and details about them : `creation` `modification` `deletion`, and details about the entity itself.
+
+## Database Diagram
+
+![Diagram_epic_events_db](https://github.com/TroadecJb/P12-EPIC_Events/assets/110687346/8052f0bb-9ac6-4f04-9e55-c07b73ef3589)
+

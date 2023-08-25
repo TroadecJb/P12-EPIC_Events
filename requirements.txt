@@ -1,5 +1,5 @@
 bcrypt==4.0.1
-black==23.7.0
+certifi==2023.7.22
 click==8.1.6
 greenlet==2.0.2
 inquirerpy==0.3.4
@@ -9,7 +9,9 @@ pathspec==0.11.2
 pfzy==0.3.4
 platformdirs==3.10.0
 prompt-toolkit==3.0.39
+sentry-sdk==1.29.2
 SQLAlchemy==2.0.19
 tomli==2.0.1
 typing_extensions==4.7.1
+urllib3==2.0.4
 wcwidth==0.2.6

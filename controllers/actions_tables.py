@@ -132,7 +132,7 @@ class ActionsManager:
         self.auth_controller.login()
         if self.auth_controller.user_instance is not None:
             self.user = self.auth_controller.user_instance
-            self.user_actions = self.actions_by_role[self.user.id]
+            self.user_actions = self.actions_by_role[self.user.role_idid]
             return self.start(user=self.user)
 
         else:

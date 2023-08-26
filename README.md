@@ -1,7 +1,7 @@
 # P12-EPIC_Events
 
 ## Overview
-This project is a CRM programm (CLI python) to manage a database and perform specific actions on its content.  
+This project is a CRM programm (python) to manage a database and perform specific actions on its content.  
 Users identified by their account can perform job's specific actions over four types of entities (User, Client, Contract, Event).  
 Out of the box it uses a sqlite3 databse (comes with python), using SQLAlchemy to manage the database and setup to log with Sentry.
 
@@ -15,7 +15,7 @@ Each user can logout for another user to login using its own credentials.
 
 ## Config file
 Edit `config.txt` to customize the default parameters (sqlite3 database location and name, Sentry DSN key, default admin credentials (only account at start)).  
-to specify sqlite3 database location and its name.
+
 
 section `CONFIG`:
 - **Databse**  

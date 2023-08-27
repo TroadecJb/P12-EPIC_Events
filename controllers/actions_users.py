@@ -41,12 +41,15 @@ def read_user_all(session, readonly=True, user=None, **kwargs):
         readonly (bool) : True print the result / False return the result
     """
     result = session.scalars(select(User)).all()
-    if readonly:
-        view.basic_list(result)
-        session.close()
-        return
+    if result:
+        if readonly:
+            view.basic_list(result)
+            session.close()
+            return
+        else:
+            return result
     else:
-        return result
+        return
 
 
 def read_user_by_name(session, readonly=True, user=None, **kwargs):
@@ -59,20 +62,26 @@ def read_user_by_name(session, readonly=True, user=None, **kwargs):
     user_name = view.user_input(detail="users's name")
     stmt = select(User).where(User.name.contains(user_name))
     result = session.scalars(stmt).all()
-    if readonly:
-        if len(result) > 1:
-            view.basic_list(result)
-            session.close()
-            return
+    if result:
+        if readonly:
+            if len(result) > 1:
+                view.basic_list(result)
+                session.close()
+                return
+            else:
+                view.basic(result[0])
+                session.close()
+                return
         else:
-            view.basic(result[0])
-            session.close()
-            return
+            if len(result) > 1:
+                return result
+            else:
+                return result[0]
     else:
-        if len(result) > 1:
-            return result
-        else:
-            return result[0]
+        view.basic(message="No match")
+        if readonly:
+            return False
+        return
 
 
 def read_user_by_email(session, readonly=True, user=None, **kwargs):
@@ -85,20 +94,26 @@ def read_user_by_email(session, readonly=True, user=None, **kwargs):
     user_email = view.user_input(detail="user's email")
     stmt = select(User).where(User.email.contains(user_email))
     result = session.scalars(stmt).all()
-    if readonly:
-        if len(result) > 1:
-            view.basic_list(result)
-            session.close()
-            return
+    if result:
+        if readonly:
+            if len(result) > 1:
+                view.basic_list(result)
+                session.close()
+                return
+            else:
+                view.basic(result[0])
+                session.close()
+                return
         else:
-            view.basic(result[0])
-            session.close()
-            return
+            if len(result) > 1:
+                return result
+            else:
+                return result[0]
     else:
-        if len(result) > 1:
-            return result
-        else:
-            return result[0]
+        view.basic(message="No match")
+        if readonly:
+            return
+        return False
 
 
 def read_user_by_phone(session, readonly=True, user=None, **kwargs):
@@ -111,20 +126,26 @@ def read_user_by_phone(session, readonly=True, user=None, **kwargs):
     user_phone = view.user_input(detail="user's phone")
     stmt = select(User).where(User.email.contains(user_phone))
     result = session.scalars(stmt).all()
-    if readonly:
-        if len(result) > 1:
-            view.basic_list(result)
-            session.close()
-            return
+    if result:
+        if readonly:
+            if len(result) > 1:
+                view.basic_list(result)
+                session.close()
+                return
+            else:
+                view.basic(result[0])
+                session.close()
+                return
         else:
-            view.basic(result[0])
-            session.close()
-            return
+            if len(result) > 1:
+                return result
+            else:
+                return result[0]
     else:
-        if len(result) > 1:
-            return result
-        else:
-            return result[0]
+        view.basic(message="No match")
+        if readonly:
+            return
+        return False
 
 
 def create_user(session, readonly=True, user=None, **kwargs):
@@ -161,37 +182,43 @@ def create_user(session, readonly=True, user=None, **kwargs):
 
 def update_user(session, readonly=True, user=None, **kwargs):
     users = read_user_by_name(session, readonly=False)
-    user_selected = view.select_obj_from_list(users)
-    view.basic(user_selected)
-    values = ask_values()
-    stmt = update(User).where(User.id == user_selected.id).values(values)
-    try:
-        session.execute(stmt)
-        session.commit()
-        view.basic(message="update successful")
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} updated {user_selected.id} with {values.items()}"
-        )
-    except CompileError as er:
-        view.error_message(er)
-        session.rollback()
-    finally:
+    if users:
+        user_selected = view.select_obj_from_list(users)
+        view.basic(user_selected)
+        values = ask_values()
+        stmt = update(User).where(User.id == user_selected.id).values(values)
+        try:
+            session.execute(stmt)
+            session.commit()
+            view.basic(message="update successful")
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} updated {user_selected.id} with {values.items()}"
+            )
+        except CompileError as er:
+            view.error_message(er)
+            session.rollback()
+        finally:
+            return
+    else:
         return
 
 
 def delete_user(session, readonly=True, user=None, **kwargs):
     users = read_user_by_name(session, readonly=False)
-    user_selected = view.select_obj_from_list(users)
-    stmt = delete(User).where(User.id == user_selected.id)
+    if users:
+        user_selected = view.select_obj_from_list(users)
+        stmt = delete(User).where(User.id == user_selected.id)
 
-    try:
-        session.execute(stmt)
-        session.commit()
-        capture_message(f"user: {user.id} {user.name} {user.email} deleted {User}")
-    except:
-        session.rollback()
-    session.close()
-    return
+        try:
+            session.execute(stmt)
+            session.commit()
+            capture_message(f"user: {user.id} {user.name} {user.email} deleted {User}")
+        except:
+            session.rollback()
+        session.close()
+        return
+    else:
+        return
 
 
 def change_password(session, readonly=False, user=None, **kwargs):

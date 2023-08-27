@@ -83,7 +83,7 @@ class Client(Base):
     contact_last: Mapped[date] = mapped_column(Date, server_default=func.current_date())
     company: Mapped[Optional[str]] = mapped_column(String(100), default=None)
     address: Mapped[Optional[str]] = mapped_column(String(400), default=None)
-    commercial_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    commercial_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
     commercial: Mapped["User"] = relationship(
         back_populates="clients", cascade="all, delete"
     )
@@ -102,11 +102,11 @@ class Event(Base):
     __tablename__ = "events"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    contract_id: Mapped[int] = mapped_column(ForeignKey("contracts.id"))
+    contract_id: Mapped[Optional[int]] = mapped_column(ForeignKey("contracts.id"))
     contract: Mapped["Contract"] = relationship(
         back_populates="events", cascade="all, delete"
     )
-    support_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    support_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
     support: Mapped["User"] = relationship(
         back_populates="events", cascade="all, delete"
     )
@@ -133,7 +133,7 @@ class Contract(Base):
     __tablename__ = "contracts"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    client_id: Mapped[int] = mapped_column(ForeignKey("clients.id"))
+    client_id: Mapped[Optional[int]] = mapped_column(ForeignKey("clients.id"))
     client: Mapped["Client"] = relationship(
         back_populates="contracts", cascade="all, delete"
     )
@@ -143,7 +143,7 @@ class Contract(Base):
     cost_total: Mapped[float] = mapped_column(Float, default=0.0)
     cost_remaining: Mapped[float] = mapped_column(Float, default=cost_total)
     valid: Mapped[bool] = mapped_column(Boolean, default=False)
-    commercial_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    commercial_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
     commercial: Mapped["User"] = relationship(
         back_populates="contracts", cascade="all, delete"
     )

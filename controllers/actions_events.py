@@ -31,12 +31,18 @@ def read_event(session, readonly=True, **kwargs):
 
 def read_event_all(session, readonly=True, **kwargs):
     result = session.scalars(select(Event)).all()
-    if readonly:
-        view.basic_list(result)
-        session.close()
-        return
+    if result:
+        if readonly:
+            view.basic_list(result)
+            session.close()
+            return
+        else:
+            return result
     else:
-        return result
+        view.basic(message="No event")
+        if readonly:
+            return False
+        return
 
 
 def read_event_by_client_name(session, readonly=True, **kwargs):
@@ -109,12 +115,17 @@ def read_event_by_support_name(session, readonly=True, **kwargs):
             session.close()
             return
         return result
-    else:
+    elif len(result) == 1:
         if readonly:
             view.basic(result[0])
             session.close()
             return
         return result[0]
+    else:
+        view.basic(message="No match")
+        if readonly:
+            return False
+        return
 
 
 def read_event_by_attendee(session, readonly=True, **kwargs):
@@ -225,61 +236,69 @@ def create_event(session, readonly=False, user=None, **kwargs):
 
 def update_event(session, readonly=True, user=None, **kwargs):
     events = read_event(session, readonly=False, **kwargs)
-    selected_event = view.select_obj_from_list(events)
-    view.basic(selected_event)
-    values = ask_values()
-    stmt = update(Event).where(Event.id == selected_event.id).values(values)
-    try:
-        session.execute(stmt)
-        session.commit()
-        view.basic(message="update successful")
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} deleted {selected_event}"
-        )
-    except CompileError as er:
-        view.error_message(er)
-        session.rollback()
-    finally:
-        session.close()
+    if events:
+        selected_event = view.select_obj_from_list(events)
+        view.basic(selected_event)
+        values = ask_values()
+        stmt = update(Event).where(Event.id == selected_event.id).values(values)
+        try:
+            session.execute(stmt)
+            session.commit()
+            view.basic(message="update successful")
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} deleted {selected_event}"
+            )
+        except CompileError as er:
+            view.error_message(er)
+            session.rollback()
+        finally:
+            session.close()
+            return
+    else:
         return
 
 
 def update_event_in_charge(session, readonly=False, user=None, **kwargs):
     events = read_event_in_charge(session, readonly, user=user, **kwargs)
-    selected_event = view.select_obj_from_list(events)
-    view.basic(selected_event)
-    values = ask_values()
-    stmt = update(Event).where(Event.id == selected_event.id).values(values)
-    try:
-        session.execute(stmt)
-        session.commit()
-        view.basic(message="update successful")
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} updated {selected_event.id} with {values.items()}"
-        )
-    except CompileError as er:
-        view.error_message(er)
-        session.rollback()
-    finally:
-        session.close()
-        return
+    if events:
+        selected_event = view.select_obj_from_list(events)
+        view.basic(selected_event)
+        values = ask_values()
+        stmt = update(Event).where(Event.id == selected_event.id).values(values)
+        try:
+            session.execute(stmt)
+            session.commit()
+            view.basic(message="update successful")
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} updated {selected_event.id} with {values.items()}"
+            )
+        except CompileError as er:
+            view.error_message(er)
+            session.rollback()
+        finally:
+            session.close()
+            return
+    return
 
 
 def delete_event(session, readonly=True, user=None, **kwargs):
     events = read_event(session, readonly, **kwargs)
-    selected_event = view.select_obj_from_list(events)
-    stmt = delete(Event).where(Event.id == selected_event.id)
-    try:
-        session.execute(stmt)
-        session.commit()
-        view.basic(message="update successful")
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} deleted {selected_event.id} {selected_event}"
-        )
-    except:
-        view.error_message()
-        session.rollback()
-        return
-    finally:
-        session.close()
+    if events:
+        selected_event = view.select_obj_from_list(events)
+        stmt = delete(Event).where(Event.id == selected_event.id)
+        try:
+            session.execute(stmt)
+            session.commit()
+            view.basic(message="update successful")
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} deleted {selected_event.id} {selected_event}"
+            )
+        except:
+            view.error_message()
+            session.rollback()
+            return
+        finally:
+            session.close()
+            return
+    else:
         return

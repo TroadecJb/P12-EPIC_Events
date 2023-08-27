@@ -37,12 +37,16 @@ def read_contracts_all(session, readonly=True, **kwargs):
     If readonly=False return either list of obj or signle obj.
     """
     result = session.scalars(select(Contract)).all()
-    if readonly:
-        view.basic_list(result)
-        session.close()
-        return
+    if result:
+        if readonly:
+            view.basic_list(result)
+            session.close()
+            return
+        else:
+            return result
     else:
-        return result
+        view.basic(message="No contract")
+        return False
 
 
 def read_contract_by_client_name(session, readonly=True, **kwargs):
@@ -53,19 +57,22 @@ def read_contract_by_client_name(session, readonly=True, **kwargs):
     client_name = view.user_input(detail="client's name")
     stmt = select(Contract).join(Client).where(Client.name.contains(client_name))
     result = session.scalars(stmt).all()
-
-    if len(result) > 1:
-        if readonly:
-            view.basic_list(result)
-            session.close()
-            return
-        return result
+    if result:
+        if len(result) > 1:
+            if readonly:
+                view.basic_list(result)
+                session.close()
+                return
+            return result
+        else:
+            if readonly:
+                view.basic(result[0])
+                session.close()
+                return
+            return result[0]
     else:
-        if readonly:
-            view.basic(result[0])
-            session.close()
-            return
-        return result[0]
+        view.basic(message="No contract")
+        return False
 
 
 def read_contract_by_commerical_name(session, readonly=True, **kwargs):
@@ -76,21 +83,25 @@ def read_contract_by_commerical_name(session, readonly=True, **kwargs):
     commercial_name = view.user_input(detail="commercial's name")
     stmt = select(Contract).join(User).where(User.name.contains(commercial_name))
     result = session.execute(stmt).all()
-    if len(result) > 1:
-        if readonly:
-            view.basic_list(result)
-            session.close()
-            return
-        return result
-    else:
-        if readonly:
-            view.basic(result[0])
-            session.close()
-            return
+    if result:
+        if len(result) > 1:
+            if readonly:
+                view.basic_list(result)
+                session.close()
+                return
+            return result
         else:
-            if view.confirm():
-                return result[0]
-            return
+            if readonly:
+                view.basic(result[0])
+                session.close()
+                return
+            else:
+                if view.confirm():
+                    return result[0]
+                return
+    else:
+        view.basic(message="No commercial")
+        return False
 
 
 def read_contract_by_status(session, readonly=True, **kwargs):
@@ -105,22 +116,25 @@ def read_contract_by_status(session, readonly=True, **kwargs):
         status = False
     stmt = select(Contract).where(Contract.valid == status)
     result = session.execute(stmt).all()
-
-    if len(result) > 1:
-        if readonly:
-            view.basic_list(result)
-            session.close()
-            return
-        return result
-    else:
-        if readonly:
-            view.basic(result[0])
-            session.close()
-            return
+    if result:
+        if len(result) > 1:
+            if readonly:
+                view.basic_list(result)
+                session.close()
+                return
+            return result
         else:
-            if view.confirm():
-                return result[0]
-            return
+            if readonly:
+                view.basic(result[0])
+                session.close()
+                return
+            else:
+                if view.confirm():
+                    return result[0]
+                return
+    else:
+        view.basic(message="No contract")
+        return False
 
 
 def read_contract_by_date(session, readonly=True, **kwargs):
@@ -178,17 +192,42 @@ def read_contract_by_cost(session, readonly=True, **kwargs):
         return read_contract_by_cost(session, readonly, **kwargs)
 
     result = session.scalars(stmt).all()
-    if len(result) < 1:
-        view.basic(message="No match!")
-        return
+    if result:
+        if len(result) < 1:
+            view.basic(message="No match!")
+            return
+        else:
+            if len(result) > 1:
+                if readonly:
+                    view.basic_list(result)
+                    session.close()
+                    return
+                else:
+                    return result
+            else:
+                if readonly:
+                    view.basic(result[0])
+                    session.close()
+                    return
+                else:
+                    if view.confirm():
+                        return result[0]
+                    return
     else:
+        view.basic(message="No contract")
+        return False
+
+
+def read_contract_in_charge(session, readonly=True, user=None, **kwargs):
+    stmt = select(Contract).where(Contract.commercial.id == user.id)
+    result = session.execute(stmt).all()
+    if result:
         if len(result) > 1:
             if readonly:
                 view.basic_list(result)
                 session.close()
                 return
-            else:
-                return result
+            return result
         else:
             if readonly:
                 view.basic(result[0])
@@ -198,26 +237,9 @@ def read_contract_by_cost(session, readonly=True, **kwargs):
                 if view.confirm():
                     return result[0]
                 return
-
-
-def read_contract_in_charge(session, readonly=True, user=None, **kwargs):
-    stmt = select(Contract).where(Contract.commercial.id == user.id)
-    result = session.execute(stmt).all()
-    if len(result) > 1:
-        if readonly:
-            view.basic_list(result)
-            session.close()
-            return
-        return result
     else:
-        if readonly:
-            view.basic(result[0])
-            session.close()
-            return
-        else:
-            if view.confirm():
-                return result[0]
-            return
+        view.basic(message="No contract")
+        return
 
 
 def update_contract(session, readonly=False, user=None, **kwargs):
@@ -227,40 +249,50 @@ def update_contract(session, readonly=False, user=None, **kwargs):
         )
     else:
         contracts = read_contract(session, readonly, **kwargs)
-    selected_contract = view.select_obj_from_list(contracts)
-    view.basic(selected_contract)
-    values = ask_values()
-    stmt = update(Contract).where(Contract.id == selected_contract.id).values(values)
-    try:
-        session.execute(stmt)
-        session.commit()
-        view.basic(message="update successful")
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} updated {selected_contract.id} {selected_contract.name} with {values.items()}"
+    if contracts:
+        selected_contract = view.select_obj_from_list(contracts)
+        view.basic(selected_contract)
+        values = ask_values()
+        stmt = (
+            update(Contract).where(Contract.id == selected_contract.id).values(values)
         )
-    except CompileError as er:
-        view.error_message(er)
-        session.rollback()
-    finally:
-        session.close()
+        try:
+            session.execute(stmt)
+            session.commit()
+            view.basic(message="update successful")
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} updated {selected_contract.id} {selected_contract.name} with {values.items()}"
+            )
+        except CompileError as er:
+            view.error_message(er)
+            session.rollback()
+        finally:
+            session.close()
+            return
+    else:
+        view.basic(message="No client")
         return
 
 
 def delete_contract(session, readonly=False, user=None, **kwargs):
     contracts = read_contract(session, readonly, **kwargs)
-    selected_contract = view.select_obj_from_list(contracts)
-    stmt = delete(Contract).where(Contract.id == selected_contract.id)
-    try:
-        session.execute(stmt)
-        session.commit()
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} delted {selected_contract.id} {selected_contract}"
-        )
-        view.basic(message="contract deleted")
-    except:
-        session.rollback()
-    session.close()
-    return
+    if contracts:
+        selected_contract = view.select_obj_from_list(contracts)
+        stmt = delete(Contract).where(Contract.id == selected_contract.id)
+        try:
+            session.execute(stmt)
+            session.commit()
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} delted {selected_contract.id} {selected_contract}"
+            )
+            view.basic(message="contract deleted")
+        except:
+            session.rollback()
+        session.close()
+        return
+    else:
+        view.basic(message="No contract")
+        return
 
 
 def create_contract(session, readonly=False, user=None, **kwargs):

@@ -18,19 +18,31 @@ def read_clients(session, readonly=True, **kwargs):
     if readonly:
         if all_clients:
             result = session.scalars(select(Client)).all()
-            view.basic_list(result)
-            session.close()
-            return
+            if result:
+                view.basic_list(result)
+                session.close()
+                return
+            else:
+                view.basic(message="No Client")
+                return
         else:
             result = read_client_by_name(session, readonly)
             return
     else:
         if all_clients:
             result = session.scalars(select(Client)).all()
-            return result
+            if result:
+                return result
+            else:
+                view.basic(message="No client")
+                return False
         else:
             result = read_client_by_name(session, readonly=False)
-            return result
+            if result:
+                return result
+            else:
+                view.basic(message="No client")
+                return False
 
 
 def read_client_by_name(session, readonly=True, **kwargs):
@@ -41,20 +53,22 @@ def read_client_by_name(session, readonly=True, **kwargs):
     client_name = view.user_input(detail="client's name")
     stmt = select(Client).where(Client.name.contains(client_name))
     result = session.scalars(stmt).all()
-    if readonly:
-        if len(result) > 1:
-            view.basic_list(result)
-            session.close()
-            return
+    if result:
+        if readonly:
+            if len(result) > 1:
+                view.basic_list(result)
+                session.close()
+                return
+            else:
+                view.basic(result[0])
+                session.close()
+                return
         else:
-            view.basic(result[0])
-            session.close()
-            return
+            return result
+
     else:
-        if len(result) > 1:
-            return result
-        else:
-            return result
+        view.basic(message="No client")
+        return False
 
 
 def read_client_in_charge(session, readonly=True, user=None, **kwargs):
@@ -64,81 +78,95 @@ def read_client_in_charge(session, readonly=True, user=None, **kwargs):
     """
     stmt = select(Client).where(Client.commercial.id == user.id)
     result = session.scalars(stmt).all()
-    if readonly:
-        if len(result) > 1:
-            view.basic_list(result)
-            session.close()
-            return
+    if result:
+        if readonly:
+            if len(result) > 1:
+                view.basic_list(result)
+                session.close()
+                return
+            else:
+                view.basic(result[0])
+                session.close()
+                return
+
         else:
-            view.basic(result[0])
-            session.close()
-            return
+            if len(result) > 1:
+                return result
+            else:
+                return result
     else:
-        if len(result) > 1:
-            return result
-        else:
-            return result
+        view.basic(message="No client")
+        return
 
 
 def update_client(session, user=None, **kwargs):
     clients = read_client_by_name(session, readonly=False)
-    client_selected = view.select_obj_from_list(clients)
-    view.basic(client_selected)
-    values = ask_values()
-    stmt = update(Client).where(Client.id == client_selected.id).values(values)
-    try:
-        session.execute(stmt)
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} deleted {client_selected.id} {client_selected.name} with {values.items()}"
-        )
-        session.commit()
-        view.success(message="update done")
-    except CompileError as er:
-        view.error_message(er)
-        session.rollback()
-    finally:
+    if clients:
+        client_selected = view.select_obj_from_list(clients)
+        view.basic(client_selected)
+        values = ask_values()
+        stmt = update(Client).where(Client.id == client_selected.id).values(values)
+        try:
+            session.execute(stmt)
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} deleted {client_selected.id} {client_selected.name} with {values.items()}"
+            )
+            session.commit()
+            view.success(message="update done")
+        except CompileError as er:
+            view.error_message(er)
+            session.rollback()
+        finally:
+            return
+    else:
         return
 
 
 def update_client_in_charge(session, user=None, **kwargs):
     clients = read_client_in_charge(session, user=user, readonly=False)
-    client_selected = view.select_obj_from_list(clients)
-    view.basic(client_selected)
-    values = ask_values()
-    stmt = update(Client).where(Client.id == client_selected.id).values(values)
-    try:
-        session.execute(stmt)
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} upated {client_selected.id} {client_selected.name} with {values.items()}"
-        )
-        session.commit()
-        view.success(message="update done")
-    except CompileError as er:
-        view.error_message(er)
-        session.rollback()
-    finally:
-        session.close()
+    if clients:
+        client_selected = view.select_obj_from_list(clients)
+        view.basic(client_selected)
+        values = ask_values()
+        stmt = update(Client).where(Client.id == client_selected.id).values(values)
+        try:
+            session.execute(stmt)
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} upated {client_selected.id} {client_selected.name} with {values.items()}"
+            )
+            session.commit()
+            view.success(message="update done")
+        except CompileError as er:
+            view.error_message(er)
+            session.rollback()
+        finally:
+            session.close()
+            return
+    else:
         return
 
 
 def delete_client(session, user=None, **kwargs):
     clients = read_client_by_name(session, readonly=False)
-    client_selected = view.select_obj_from_list(clients)
-    stmt = delete(Client).where(Client.id == client_selected.id)
-    try:
-        session.execute(stmt)
-        capture_message(
-            f"user: {user.id} {user.name} {user.email} deleted {client_selected.id} {client_selected.name}"
-        )
-        session.commit()
-        view.success(message="deletion done")
-    except:
-        session.rollback()
-        view.error_message()
+    if clients:
+        client_selected = view.select_obj_from_list(clients)
+        stmt = delete(Client).where(Client.id == client_selected.id)
+        try:
+            session.execute(stmt)
+            capture_message(
+                f"user: {user.id} {user.name} {user.email} deleted {client_selected.id} {client_selected.name}"
+            )
+            session.commit()
+            view.success(message="deletion done")
+        except:
+            session.rollback()
+            view.error_message()
+            session.close()
+            return
         session.close()
         return
-    session.close()
-    return
+    else:
+        return
 
 
 def create_client(session, user=None):

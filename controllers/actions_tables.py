@@ -102,7 +102,7 @@ class ActionsManager:
         },
         "events": {
             "read events": actions_events.read_event,
-            "read eents in charge": actions_events.read_event_in_charge,
+            "read events in charge": actions_events.read_event_in_charge,
             "modify event": actions_events.update_event_in_charge,
             "-BACK-": "back",
         },
@@ -132,7 +132,7 @@ class ActionsManager:
         self.auth_controller.login()
         if self.auth_controller.user_instance is not None:
             self.user = self.auth_controller.user_instance
-            self.user_actions = self.actions_by_role[self.user.role_idid]
+            self.user_actions = self.actions_by_role[self.user.role_id]
             return self.start(user=self.user)
 
         else:

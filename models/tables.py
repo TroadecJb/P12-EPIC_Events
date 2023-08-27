@@ -28,7 +28,7 @@ class User(Base):
         back_populates="support", cascade="all, delete"
     )
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         message = (
             f"id = {self.id}\n"
             f"name = {self.name}\n"
@@ -46,6 +46,11 @@ class User(Base):
             pass
         return message
 
+    def __repr__(self) -> str:
+        return (
+            f"id={self.id}, name={self.name}, email={self.name}, role={self.role.name}"
+        )
+
 
 class Role(Base):
     __tablename__ = "roles"
@@ -54,9 +59,12 @@ class Role(Base):
     name: Mapped[str] = mapped_column(String(20))
     users: Mapped[list["User"]] = relationship(back_populates="role")
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         message = f"id  = {self.id}\n" f"name  = {self.name}\n"
         return message
+
+    def __repr__(self):
+        return f"id={self.id}, name={self.name}"
 
 
 class Client(Base):
@@ -80,11 +88,14 @@ class Client(Base):
         back_populates="clients", cascade="all, delete"
     )
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         message = (
             f"name = {self.name}\n" f"email = {self.email}\n" f"phone = {self.phone}\n"
         )
         return message
+
+    def __repr__(self) -> str:
+        return f"id={self.id}, name={self.name}, phone={self.phone}, email={self.email}, commercial={self.commercial.name} {self.commercial_id}"
 
 
 class Event(Base):
@@ -105,7 +116,7 @@ class Event(Base):
     number_attendee: Mapped[int] = mapped_column(Integer, default=0)
     note: Mapped[Optional[str]] = mapped_column(String(500), default="")
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         message = (
             f"contract id = {self.contract_id}\n"
             f"contract = {self.contract.client.name}\n"
@@ -113,6 +124,9 @@ class Event(Base):
             f"date = {self.date_begin} - {self.date_end}\n"
         )
         return message
+
+    def __repr__(self) -> str:
+        return f"id={self.id}, contract={self.contract_id}, client={self.contract.client.name}, date={self.date_begin}-{self.date_end}"
 
 
 class Contract(Base):
@@ -137,7 +151,7 @@ class Contract(Base):
         back_populates="contract", cascade="all, delete"
     )
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         message = (
             f"id =  {self.id}\n"
             f"client = {self.client.name}\n"
@@ -147,3 +161,6 @@ class Contract(Base):
             f"remaining = {self.cost_remaining}\n"
         )
         return message
+
+    def __repr__(self) -> str:
+        return f"id={self.id}, client={self.client.name}, commercial={self.commercial.name} {self.commercial_id}, valid={self.valid}"

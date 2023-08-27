@@ -158,7 +158,7 @@ class View:
         """
         choice = inquirer.select(
             message="select element :",
-            choices=[Choice(obj, name=obj.name) for obj in objs],
+            choices=[Choice(obj) for obj in objs],
         ).execute()
         return choice
 

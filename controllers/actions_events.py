@@ -185,53 +185,64 @@ def read_event_in_charge(session, readonly=True, user=None, **kwargs):
 
 def create_event(session, readonly=False, user=None, **kwargs):
     values = {
-        "contract": None,
+        "contract_id": None,
         "date_begin": None,
         "date_end": None,
         "attendee": None,
-        "support": None,
+        "support_id": None,
         "note": None,
         "address": None,
     }
     for k in values.keys():
-        if k == "contract":
+        if k == "contract_id":
             if user.role_id == 3:
-                contract = actions_contracts.read_contract_in_charge(
+                contracts = actions_contracts.read_contract_in_charge(
                     session, readonly=False, user=user, **kwargs
                 )
             else:
-                contract = actions_contracts.read_contract(session, readonly=False)
-            if type(contract) is list:
-                contract = view.select_obj_from_list(contract)
+                view.basic(message="Select client then contract to attach the event")
+                contracts = actions_contracts.read_contract_by_client_name(
+                    session, readonly=False
+                )
+            contract = view.select_obj_from_list(contracts)
             values[k] = contract.id
-        elif k in ["date_begin", "date_end"]:
-            date = view.user_input("YYYY,MMM,DD")
+        elif k == "date_begin":
+            date = view.user_input("start day: YYYY,MMM,DD")
             date = [int(x) for x in date.split(",")]
             input_date = datetime.date(date[0], date[1], date[2])
             values[k] = input_date
-        elif k == "support":
+        elif k == "date_end":
+            date = view.user_input("end day: YYYY,MMM,DD")
+            date = [int(x) for x in date.split(",")]
+            input_date = datetime.date(date[0], date[1], date[2])
+            values[k] = input_date
+        elif k == "support_id":
+            view.basic(message="select support in charge")
             support = actions_users.read_user_by_name(session, readonly=False)
             if type(support) is list:
                 support = view.select_obj_from_list(support)
             values[k] = support.id
         elif k == "attendee":
-            attendee = view.user_input()
+            attendee = view.user_input("number of attendees")
             values[k] = int(attendee)
         else:
-            values[k] = view.user_input()
-        stmt = insert(Event).values(values)
-        try:
-            session.execute(stmt)
-            session.commit()
-            capture_message(
-                f"user: {user.id} {user.name} {user.email} created Event {values.items()}"
-            )
-        except CompileError as er:
-            view.error_message(er)
-            session.rollback()
-        finally:
-            session.close()
-            return
+            val = view.user_input(detail=k)
+            values[k] = val
+    print("bb", values)
+    stmt = insert(Event).values(values)
+    try:
+        session.execute(stmt)
+        session.commit()
+        capture_message(
+            f"user: {user.id} {user.name} {user.email} created Event {values.items()}"
+        )
+        view.success(message="event created")
+    except CompileError as er:
+        view.error_message(er)
+        session.rollback()
+    finally:
+        session.close()
+        return
 
 
 def update_event(session, readonly=True, user=None, **kwargs):

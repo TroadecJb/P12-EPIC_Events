@@ -73,15 +73,12 @@ def read_user_by_name(session, readonly=True, user=None, **kwargs):
                 session.close()
                 return
         else:
-            if len(result) > 1:
-                return result
-            else:
-                return result[0]
+            return result
     else:
         view.basic(message="No match")
         if readonly:
-            return False
-        return
+            return
+        return read_user_by_name(session, readonly=False, user=user)
 
 
 def read_user_by_email(session, readonly=True, user=None, **kwargs):
@@ -174,6 +171,7 @@ def create_user(session, readonly=True, user=None, **kwargs):
         capture_message(
             f"user: {user.id} {user.name} {user.email} added User {values.items()}"
         )
+        view.success(message="User created")
     except:
         session.rollback()
     session.close()

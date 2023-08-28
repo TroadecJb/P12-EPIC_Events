@@ -1,4 +1,5 @@
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import text
 import bcrypt
 from datetime import date
 
@@ -37,6 +38,7 @@ def database_initialization(engine, db):
         check_empty = session.query(Role).first()
 
         if check_empty is None:
+            session.execute(text("PRAGMA foreign_keys=ON"))
             view.basic(f"{fg.YELLOW}Database does not exist.{fg.RESET}")
             view.basic(f"{fg.YELLOW}Creating database: {db}{fg.RESET}")
 

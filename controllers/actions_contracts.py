@@ -28,7 +28,7 @@ def read_contract(session, readonly=True, **kwargs):
     if action == "back":
         return
     else:
-        return action(session, readonly, **kwargs)
+        return action(session, readonly=readonly, **kwargs)
 
 
 def read_contracts_all(session, readonly=True, **kwargs):
@@ -69,7 +69,7 @@ def read_contract_by_client_name(session, readonly=True, **kwargs):
                 view.basic(result[0])
                 session.close()
                 return
-            return result[0]
+            return result
     else:
         view.basic(message="No contract")
         return False
@@ -235,7 +235,7 @@ def read_contract_in_charge(session, readonly=True, user=None, **kwargs):
                 return
             else:
                 if view.confirm():
-                    return result[0]
+                    return result
                 return
     else:
         view.basic(message="No contract")

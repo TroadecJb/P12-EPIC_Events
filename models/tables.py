@@ -140,11 +140,7 @@ class Contract(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     client_id: Mapped[int] = mapped_column(ForeignKey("clients.id", ondelete="CASCADE"))
-    client: Mapped["Client"] = relationship(
-        back_populates="contracts",
-        cascade="all, delete",
-        passive_deletes=True,
-    )
+    client: Mapped["Client"] = relationship(back_populates="contracts")
     date_creation: Mapped[date] = mapped_column(
         Date, server_default=func.current_date()
     )
@@ -154,11 +150,7 @@ class Contract(Base):
     commercial_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE")
     )
-    commercial: Mapped["User"] = relationship(
-        back_populates="contracts",
-        cascade="all, delete",
-        passive_deletes=True,
-    )
+    commercial: Mapped["User"] = relationship(back_populates="contracts")
     events: Mapped[list["Event"]] = relationship(
         back_populates="contract",
         cascade="all, delete",

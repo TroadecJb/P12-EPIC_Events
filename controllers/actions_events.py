@@ -234,7 +234,7 @@ def create_event(session, readonly=False, user=None, **kwargs):
         session.execute(stmt)
         session.commit()
         capture_message(
-            f"user: {user.id} {user.name} {user.email} created Event {values.items()}"
+            f"user: {user.id} {user.name} {user.email} created Event {values}"
         )
         view.success(message="event created")
     except CompileError as er:
@@ -281,7 +281,7 @@ def update_event_in_charge(session, readonly=False, user=None, **kwargs):
             session.commit()
             view.basic(message="update successful")
             capture_message(
-                f"user: {user.id} {user.name} {user.email} updated {selected_event.id} with {values.items()}"
+                f"user: {user.id} {user.name} {user.email} updated {selected_event.id} with {values}"
             )
         except CompileError as er:
             view.error_message(er)

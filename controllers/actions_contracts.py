@@ -261,7 +261,7 @@ def update_contract(session, readonly=False, user=None, **kwargs):
             session.commit()
             view.basic(message="update successful")
             capture_message(
-                f"user: {user.id} {user.name} {user.email} updated {selected_contract.id} {selected_contract.name} with {values.items()}"
+                f"user: {user.id} {user.name} {user.email} updated {selected_contract.id} {selected_contract.name} with {values}"
             )
         except CompileError as er:
             view.error_message(er)
@@ -337,7 +337,7 @@ def create_contract(session, readonly=False, user=None, **kwargs):
         session.commit()
         view.basic(message="contract created")
         capture_message(
-            f"user: {user.id} {user.name} {user.email} created Contract {values.items()}"
+            f"user: {user.id} {user.name} {user.email} created Contract {values}"
         )
     except CompileError as er:
         view.error_message(er)
